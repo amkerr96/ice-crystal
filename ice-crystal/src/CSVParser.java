@@ -103,17 +103,24 @@ public class CSVParser extends JFrame {
 	//        		line=br.readLine();
 	//        		System.out.println(line);
 	        		
-	            	String [] fields = line.split("\t", -1);
+	        		if (counter >= 4) {
+		            	String [] fields = line.split("\t", -1);
+		            	
+		            	city = fields[5];
+		            	state = fields[6];
+		            	date = fields[16];
+		            	prodID = fields[22];
+		            	archGrp = fields[23];
+		            	if (!fields[28].equals("")) {
+		            		spend = Double.parseDouble(fields[28]);
+		            	} else {
+		            		spend = 0.0;
+		            	}
+		   
 	            	
-	            	city = fields[5];
-	            	state = fields[6];
-	            	date = fields[16];
-	            	prodID = fields[22];
-	            	archGrp = fields[23];
-	            	//spend = Double.parseDouble(fields[28]);
-            	
-	            	System.out.printf("%s, %s, %s, %s, %s\n", city, state, date, prodID, archGrp);//archGrp, spend);
-            	
+		            	System.out.printf("%s, %s, %s, %s, %s, %f\n", city, state, date, prodID, archGrp, spend);
+	        		}
+	        		counter++;
 	        	}	
     		} catch (ArrayIndexOutOfBoundsException e) {	
 
