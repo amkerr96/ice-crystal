@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.EmptyBorder;
 
+import org.ibex.nestedvm.util.ELF.Symbol;
+
 public class CSVParser extends JFrame {
 	static int buttonHit = 0;
 	static JFrame frame;
@@ -80,20 +82,47 @@ public class CSVParser extends JFrame {
             FileReader fr = new FileReader(fileName);
             BufferedReader br = new BufferedReader(fr);
 
-        	String field = br.readLine();
+        	String line = null; 
+//        	String street = null; //4
+        	String city = null; //5
+        	String state = null; //6
+//        	String zip = null; //7
+        	String date = null; //16
+//        	String ldos = null; //17
+        	String prodID = null; //22
+        	String archGrp = null; //23
+        	double spend = 0.0; //28
+        	
+        	int counter = 0;
+        	
+        	try {
+	        	while ((line = br.readLine()) != null) {
+	        	//Limited Testing
+	//        	while(counter < 13) {
+	//            	counter++;
+	//        		line=br.readLine();
+	//        		System.out.println(line);
+	        		
+	            	String [] fields = line.split("\t", -1);
+	            	
+	            	city = fields[5];
+	            	state = fields[6];
+	            	date = fields[16];
+	            	prodID = fields[22];
+	            	archGrp = fields[23];
+	            	//spend = Double.parseDouble(fields[28]);
+            	
+	            	System.out.printf("%s, %s, %s, %s, %s\n", city, state, date, prodID, archGrp);//archGrp, spend);
+            	
+	        	}	
+    		} catch (ArrayIndexOutOfBoundsException e) {	
 
-            while (field != null) {
-             field = br.readLine();
-            	try {
-            		
-        		} catch (ArrayIndexOutOfBoundsException e) {	
+        	} catch(NullPointerException e) {
 
-            	} catch(NullPointerException e) {
-
-            	}
-            }
+        	} 
 
             if (buttonHit == 2 || buttonHit == 3) {
+            	
         	}
 
             br.close();        
