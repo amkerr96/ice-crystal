@@ -1,14 +1,17 @@
 import java.io.*;
+import java.util.HashMap;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.EmptyBorder;
 
-import org.ibex.nestedvm.util.ELF.Symbol;
-
 public class CSVParser extends JFrame {
 	static int buttonHit = 0;
 	static JFrame frame;
+	static HashMap<String, Double> locations = new HashMap<String, Double>();
+	static HashMap<String, HashMap< String, Double>> archLocations = new HashMap<String, HashMap< String, Double>>();
+	static HashMap<String, HashMap< String, Integer>> prodLocations = new HashMap<String, HashMap< String, Integer>>();
 
     public static void main(String [] args) {
     	frame = new JFrame("Unit Tester");
@@ -82,6 +85,7 @@ public class CSVParser extends JFrame {
             FileReader fr = new FileReader(fileName);
             BufferedReader br = new BufferedReader(fr);
 
+            //Raw info by line
         	String line = null; 
 //        	String street = null; //4
         	String city = null; //5
@@ -92,9 +96,10 @@ public class CSVParser extends JFrame {
         	String prodID = null; //22
         	String archGrp = null; //23
         	double spend = 0.0; //28
+        	     	
+        	
         	
         	int counter = 0;
-        	
         	try {
 	        	while ((line = br.readLine()) != null) {
 	        	//  Limited Testing
@@ -115,13 +120,53 @@ public class CSVParser extends JFrame {
 		            		spend = Double.parseDouble(fields[28]);
 		            	} else {
 		            		spend = 0.0;
-		            	}
-		   
+		            	}		   
 	            	
 		            	System.out.printf("%s, %s, %s, %s, %s, %f\n", city, state, date, prodID, archGrp, spend);
+	        		
+		            	//Tier 1
+		            	if (locations.get(city) == null) {
+		            		locations.put(city, spend);
+		            	} else {
+		            		locations.put(city, ((Double)locations.get(city)).doubleValue() + spend);
+		            	}
+		            	
+		            	//Tier 2
+		            	HashMap<String, Double> archs = new HashMap<String, Double>();
+		            	if (archLocations.get(city) == null) {
+		            		archs.put(archGrp, spend);
+		            		archLocations.put(city, archs);
+		            	} else {
+		            		HashMap<String, Double> inner = archLocations.get(city);
+		            		if (inner.get(archGrp) == null) {
+		            			inner.put(archGrp, spend);
+		            		} else {
+		            			inner.put(archGrp, ((Double)inner.get(archGrp)).doubleValue() + spend);
+		            		}		            	
+		            		archLocations.put(city, inner);
+		            	}
+		            	
+		            	//Tier 3 still in progress
+		            	HashMap<String, Double> prods = new HashMap<String, Double>();
+//		            	if (prodLocations.get(city) == null) {
+//		            		prods.put(prodID, spend);
+//		            		prodLocations.put(city, prods);
+//		            	} else {
+//		            		HashMap<String, Double> inner = prodLocations.get(city);
+//		            		if (inner.get(prodID) == null) {
+//		            			inner.put(prodID, spend);
+//		            		} else {
+//		            			inner.put(prodID, ((Double)inner.get(prodID)).doubleValue() + spend);
+//		            		}		            	
+//		            		prodLocations.put(city, inner);
+//		            	}		            	
+	        		
+	        		
 	        		}
 	        		counter++;
 	        	}	
+	        	System.out.println(locations.toString());
+	        	System.out.println(archLocations.toString());
     		} catch (ArrayIndexOutOfBoundsException e) {	
 
         	} catch(NullPointerException e) {

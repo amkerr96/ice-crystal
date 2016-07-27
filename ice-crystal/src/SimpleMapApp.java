@@ -1,11 +1,9 @@
 import processing.core.PApplet;
 import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.geo.Location;
-import de.fhpotsdam.unfolding.mapdisplay.MapDisplayFactory;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.providers.Microsoft;
 import de.fhpotsdam.unfolding.providers.OpenStreetMap;
-import de.fhpotsdam.unfolding.providers.StamenMapProvider;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 
 
@@ -40,6 +38,9 @@ public class SimpleMapApp extends PApplet {
 		imgMarker1 = new ImageMarker(veniceLocation, loadImage("ui/marker_red.png"));
 		imgMarker2 = new ImageMarker(berlinLocation, loadImage("ui/marker_gray.png"));
 		imgMarker3 = new ImageMarker(lisbonLocation, loadImage("ui/marker_gray.png"));
+		imgMarker1.setSelected(true);
+		imgMarker2.setSelected(true);
+		imgMarker3.setSelected(true);
 		
 	}
 
