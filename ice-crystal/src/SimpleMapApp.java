@@ -6,6 +6,7 @@ import de.fhpotsdam.unfolding.providers.Microsoft;
 import de.fhpotsdam.unfolding.providers.OpenStreetMap;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 
+import org.geonames.*;
 
 /**
  * Demonstrates how to use ImageMarkers with different icons. Note, the used icons contain translucent (the shadows) and
@@ -24,6 +25,10 @@ public class SimpleMapApp extends PApplet {
 	ImageMarker imgMarker1;
 	ImageMarker imgMarker2;
 	ImageMarker imgMarker3;
+	
+	// Just an example of how to use geoNames
+	String searchName = "Raleigh North Carolina United States";
+	ToponymSearchCriteria searchCriteria = new ToponymSearchCriteria();
 
 	public void setup() {
 		size(800, 600, OPENGL);
@@ -42,6 +47,18 @@ public class SimpleMapApp extends PApplet {
 		imgMarker2.setSelected(true);
 		imgMarker3.setSelected(true);
 		
+		// geoNames example continued
+		WebService.setUserName("icecrystal");
+		searchCriteria.setQ(searchName);
+		try {
+			ToponymSearchResult searchResult = WebService.search(searchCriteria);
+			println("\n---RESULTS---\n");
+			for(Toponym toponym : searchResult.getToponyms()) {
+				println(toponym.getName() + " " + toponym.getCountryName() + " " + toponym.getLongitude() + " " + toponym.getLatitude());
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void draw() {
