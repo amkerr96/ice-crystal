@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.HashMap;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -10,6 +9,7 @@ public class CSVParser extends JFrame {
 	static int buttonHit = 0;
 	static JFrame frame;
 	static HashMap<String, Double> locations = new HashMap<String, Double>();
+	static HashMap<String, String> states = new HashMap<String, String>();
 	static HashMap<String, HashMap< String, Double>> archLocations = new HashMap<String, HashMap< String, Double>>();
 	static HashMap<String, HashMap< String, Integer>> prodLocations = new HashMap<String, HashMap< String, Integer>>();
 
@@ -45,13 +45,11 @@ public class CSVParser extends JFrame {
 				frame.dispose();
 			}
 		});
-
-		
+	
 //		String path = System.getProperty("user.dir") + "/Logo.png";
 //		ImageIcon iconLogo = new ImageIcon(path);
 //		JLabel picLabel = new JLabel();
-//        picLabel.setIcon(iconLogo);
-		
+//        picLabel.setIcon(iconLogo);		
 
         panel.setBorder(new EmptyBorder(new Insets(20, 30, 20, 30)));
 		panel.add(button1);
@@ -67,6 +65,7 @@ public class CSVParser extends JFrame {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();
 		frame.setVisible(true);
+
     }
 
     public static void chooseFile() {
@@ -95,8 +94,7 @@ public class CSVParser extends JFrame {
 //        	String ldos = null; //17
         	String prodID = null; //22
         	String archGrp = null; //23
-        	double spend = 0.0; //28
-        	     	
+        	double spend = 0.0; //28        	     	
         	
         	
         	int counter = 0;
@@ -122,11 +120,12 @@ public class CSVParser extends JFrame {
 		            		spend = 0.0;
 		            	}		   
 	            	
-		            	System.out.printf("%s, %s, %s, %s, %s, %f\n", city, state, date, prodID, archGrp, spend);
+		            	//System.out.printf("%s, %s, %s, %s, %s, %f\n", city, state, date, prodID, archGrp, spend);
 	        		
 		            	//Tier 1
 		            	if (locations.get(city) == null) {
 		            		locations.put(city, spend);
+		            		states.put(city, state);
 		            	} else {
 		            		locations.put(city, ((Double)locations.get(city)).doubleValue() + spend);
 		            	}
@@ -165,8 +164,8 @@ public class CSVParser extends JFrame {
 	        		}
 	        		counter++;
 	        	}	
-	        	System.out.println(locations.toString());
-	        	System.out.println(archLocations.toString());
+//	        	System.out.println(locations.toString());
+//	        	System.out.println(archLocations.toString());
     		} catch (ArrayIndexOutOfBoundsException e) {	
 
         	} catch(NullPointerException e) {
