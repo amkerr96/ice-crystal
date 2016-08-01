@@ -34,7 +34,7 @@ public class SimpleMapApp extends PApplet {
 	ToponymSearchCriteria searchCriteria = new ToponymSearchCriteria();
 
 	public void setup() {
-		size(800, 600, OPENGL);
+		size(900, 800, OPENGL);
 
 		map1 = new UnfoldingMap(this, new Google.GoogleMapProvider());
 	    map2 = new UnfoldingMap(this, new Microsoft.AerialProvider());
@@ -111,14 +111,12 @@ public class SimpleMapApp extends PApplet {
 	    	if(selected.contains(hitMarker)) {
 	    		hitMarker.setImage(loadImage("ui/marker_gray.png"));
 	    		newSelected.remove(hitMarker);
-	    		selected = newSelected;
-	    	    changes.firePropertyChange("selected", oldSelected, newSelected);
 	    	} else {
 	    		hitMarker.setImage(loadImage("ui/marker_red.png"));
 	    		newSelected.add(hitMarker);
-	    		selected = newSelected;
-	    	    changes.firePropertyChange("selected", oldSelected, newSelected);
 	    	}
+    		selected = newSelected;
+    	    changes.firePropertyChange("selected", oldSelected, newSelected);
     		map1.getDefaultMarkerManager().draw();
 	    } else {
 	    	println("Too far away!");
@@ -136,5 +134,34 @@ public class SimpleMapApp extends PApplet {
 	
 	public ArrayList<ImageMarker> getSelected() {
 		return selected;
+	}
+	
+	public void selectGroup(String state, boolean add) {
+		ArrayList<ImageMarker> newSelected = new ArrayList<ImageMarker>();
+		ArrayList<ImageMarker> oldSelected = new ArrayList<ImageMarker>();
+		for(ImageMarker i : selected) {
+			newSelected.add(i);
+			oldSelected.add(i);
+		}
+		
+		println((add?"Adding ":"Removing ") + "all from " + state);
+		
+		for(String s: CSVParser.states.keySet()) {
+			if(add) {
+				if(!locations.containsKey(s)) {
+					newSelected.add(locations.get(s));
+		    		locations.get(s).setImage(loadImage("ui/marker_red.png"));
+				}
+			} else {
+				if(locations.containsKey(s)) {
+					newSelected.remove(locations.get(s));
+		    		locations.get(s).setImage(loadImage("ui/marker_gray.png"));
+				}
+			}
+		}
+		
+		selected = newSelected;
+	    changes.firePropertyChange("selected", oldSelected, newSelected);
+		map1.getDefaultMarkerManager().draw();
 	}
 }

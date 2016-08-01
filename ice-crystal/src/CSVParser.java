@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +13,7 @@ public class CSVParser extends JFrame {
 	static HashMap<String, String> states = new HashMap<String, String>();
 	static HashMap<String, HashMap< String, Double>> archLocations = new HashMap<String, HashMap< String, Double>>();
 	static HashMap<String, HashMap< String, Integer>> prodLocations = new HashMap<String, HashMap< String, Integer>>();
-
+	
     public static void main(String [] args) {
     	frame = new JFrame("Unit Tester");
     	JPanel panel = new JPanel();
@@ -68,8 +69,8 @@ public class CSVParser extends JFrame {
 
     }
 
-    public static void chooseFile() {
-       String fileName = null;
+    public static String chooseFile() {
+    	String fileName = null;
 
         JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -78,7 +79,10 @@ public class CSVParser extends JFrame {
 		    File selectedFile = fileChooser.getSelectedFile();
 		    fileName = selectedFile.getAbsolutePath();			
 		}
-
+		return fileName;
+    }
+    
+    public static void parseFile(String fileName) {
         try {
         	//Reader
             FileReader fr = new FileReader(fileName);
@@ -171,6 +175,11 @@ public class CSVParser extends JFrame {
         	} catch(NullPointerException e) {
 
         	} 
+//            System.out.println("STATES: " + states);
+//            System.out.println("LOCATIONS: " + locations);
+//            System.out.println("ARCH LOCATIONS: " + archLocations);
+//            System.out.println("PROD LOCATIONS: " + prodLocations);
+
 
             if (buttonHit == 2 || buttonHit == 3) {
             	
@@ -189,4 +198,16 @@ public class CSVParser extends JFrame {
                 + fileName + "'");
         }
     }
+    
+    public static ArrayList<String> getStates() {
+    	ArrayList<String> statesList = new ArrayList<String>();
+    	for(String s: states.keySet()) {
+    		String state = states.get(s);
+    		if(!statesList.contains(state)) {
+    			statesList.add(state);
+    		}
+    	}
+    	return statesList;
+    }
 }
+
