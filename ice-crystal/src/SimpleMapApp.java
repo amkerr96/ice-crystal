@@ -1,11 +1,16 @@
 import processing.core.PApplet;
 import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.geo.Location;
+import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.providers.Microsoft;
 import de.fhpotsdam.unfolding.providers.OpenStreetMap;
 import de.fhpotsdam.unfolding.utils.MapUtils;
+import de.fhpotsdam.unfolding.utils.ScreenPosition;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.geonames.*;
@@ -15,25 +20,17 @@ import org.geonames.*;
  * transparent (the inner holes) areas.
  */
 public class SimpleMapApp extends PApplet {
-
-	Location berlinLocation = new Location(52.5f, 13.4f);
-	Location veniceLocation = new Location(45.44f, 12.34f);
-	Location lisbonLocation = new Location(38.71f, -9.14f);
+	
+	private PropertyChangeSupport changes = new PropertyChangeSupport(this);
 
 	UnfoldingMap currentMap;
 	UnfoldingMap map1;
 	UnfoldingMap map2;
 	UnfoldingMap map3;
-	ImageMarker imgMarker1;
-	ImageMarker imgMarker2;
-	ImageMarker imgMarker3;
-	ImageMarker img4;
-	
 	int numLocations;
-	HashMap<String, Location> coords = new HashMap<String, Location>();
 	
-	// Just an example of how to use geoNames
-	String searchName = "CHATTANOOGA TN";
+	HashMap<String, ImageMarker> locations = new HashMap<String, ImageMarker>();
+	ArrayList<ImageMarker> selected = new ArrayList<ImageMarker>();
 	ToponymSearchCriteria searchCriteria = new ToponymSearchCriteria();
 
 	public void setup() {
@@ -46,43 +43,36 @@ public class SimpleMapApp extends PApplet {
 	    
 	    currentMap = map1;
 		
-		// geoNames example continued
 		WebService.setUserName("icecrystal");
-		searchCriteria.setQ(searchName);
-		try {
-			ToponymSearchResult searchResult = WebService.search(searchCriteria);
-			println("\n---RESULTS---\n");
-			Toponym toponym = searchResult.getToponyms().get(0);
-			img4 = new ImageMarker(new Location(toponym.getLatitude(), toponym.getLongitude()), loadImage("ui/marker_gray.png"));
-			println(toponym.getName() + " " + toponym.getCountryName() + " " + toponym.getLongitude() + " " + toponym.getLatitude());
-		} catch(Exception e) {
-			e.printStackTrace();
-		}		
 	}
 	
 	
 	
 	public void loadLocations() {
 		String withState = null;
-//		int locLength = CSVParser.locations.keySet().size();
 		WebService.setUserName("icecrystal");
 		
-		for (String loc : CSVParser.locations.keySet()) {
-			withState = loc + ", " + CSVParser.states.get(loc);
-			
+		String[] locs = {"Raleigh", "Atlanta", "Charlotte North Carolina", "Nashville"};
+				
+		for (String loc : /*locs*/CSVParser.locations.keySet()) {
+			withState = loc + ", " + CSVParser.states.get(loc);			
 			searchCriteria.setQ(withState);
 			ToponymSearchResult searchResult;
 			try {
 				searchResult = WebService.search(searchCriteria);
 				Toponym toponym = searchResult.getToponyms().get(0);
+				println(toponym);
 				Location coord = new Location(toponym.getLatitude(), toponym.getLongitude());
 				
-				coords.put(loc, coord);
+				if(!locations.containsKey(loc)) {
+					// Put other data in here
+					locations.put(loc, new ImageMarker(toponym.getName(), coord, loadImage("ui/marker_gray.png")));
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		System.out.println(coords);
+		System.out.println(locations);
 	}
 
 	public void draw() {
@@ -93,8 +83,8 @@ public class SimpleMapApp extends PApplet {
 	public void draw2() {
 		loadLocations();
 		currentMap.draw();
-		for (Location coord : coords.values()) {
-			currentMap.addMarker(new ImageMarker(coord, loadImage("ui/marker_gray.png")));
+		for (String loc : locations.keySet()) {
+			currentMap.addMarker(locations.get(loc));
 		}
 	}
 	 
@@ -106,5 +96,45 @@ public class SimpleMapApp extends PApplet {
 	    } else if (key == '3') {
 	        currentMap = map3;
 	    }
+	}
+	
+	public void mouseClicked() {
+		ArrayList<ImageMarker> newSelected = new ArrayList<ImageMarker>();
+		ArrayList<ImageMarker> oldSelected = new ArrayList<ImageMarker>();
+		for(ImageMarker i : selected) {
+			newSelected.add(i);
+			oldSelected.add(i);
+		}
+	    ImageMarker hitMarker = (ImageMarker) currentMap.getDefaultMarkerManager().getNearestMarker(mouseX, mouseY);
+	    println("\nClick! Hit marker: " + hitMarker.getName() + hitMarker.getLocation());
+	    if(currentMap.getScreenPosition(hitMarker.getLocation()).dist(new ScreenPosition(mouseX, mouseY)) < 14/*magic #*/) {
+	    	if(selected.contains(hitMarker)) {
+	    		hitMarker.setImage(loadImage("ui/marker_gray.png"));
+	    		newSelected.remove(hitMarker);
+	    		selected = newSelected;
+	    	    changes.firePropertyChange("selected", oldSelected, newSelected);
+	    	} else {
+	    		hitMarker.setImage(loadImage("ui/marker_red.png"));
+	    		newSelected.add(hitMarker);
+	    		selected = newSelected;
+	    	    changes.firePropertyChange("selected", oldSelected, newSelected);
+	    	}
+    		map1.getDefaultMarkerManager().draw();
+	    } else {
+	    	println("Too far away!");
+	    }
+
+	}
+	
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		changes.addPropertyChangeListener(l);
+	}
+	
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		changes.removePropertyChangeListener(l);
+	}
+	
+	public ArrayList<ImageMarker> getSelected() {
+		return selected;
 	}
 }

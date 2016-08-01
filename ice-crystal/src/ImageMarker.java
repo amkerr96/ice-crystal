@@ -9,11 +9,14 @@ import de.fhpotsdam.unfolding.marker.AbstractMarker;
  */
 public class ImageMarker extends AbstractMarker {
 
-	PImage img;
+	private PImage img;
+	private String name;
+	//private Something otherDataGoesHere;
 
-	public ImageMarker(Location location, PImage img) {
+	public ImageMarker(String name, Location location, PImage img) {
 		super(location);
 		this.img = img;
+		this.name = name;
 	}
 
 	@Override
@@ -30,5 +33,18 @@ public class ImageMarker extends AbstractMarker {
 	protected boolean isInside(float checkX, float checkY, float x, float y) {
 		return checkX > x && checkX < x + img.width && checkY > y && checkY < y + img.height;
 	}
+	
+	/*public Location getLocation() {
+		return this.location;
+	}*/
+	
 
+	public String getName() {
+		return this.name;
+	}
+	
+	public void setImage(PImage img) {
+		this.img = img;
+	}
+	
 }
