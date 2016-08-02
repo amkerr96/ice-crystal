@@ -1,4 +1,6 @@
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.*;
@@ -119,9 +121,9 @@ public class CSVParser extends JFrame {
 		            	prodID = fields[22];
 		            	archGrp = fields[23];
 		            	if (!fields[28].equals("")) {
-		            		spend = Double.parseDouble(fields[28]);
+		            		spend = round(Double.parseDouble(fields[28]), 2);
 		            	} else {
-		            		spend = 0.0;
+		            		spend = 0.00;
 		            	}		   
 	            	
 		            	//System.out.printf("%s, %s, %s, %s, %s, %f\n", city, state, date, prodID, archGrp, spend);
@@ -209,5 +211,15 @@ public class CSVParser extends JFrame {
     	}
     	return statesList;
     }
+        
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+    
+
 }
 

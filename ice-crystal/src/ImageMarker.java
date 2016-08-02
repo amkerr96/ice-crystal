@@ -36,8 +36,7 @@ public class ImageMarker extends AbstractMarker implements Comparable {
 	
 	/*public Location getLocation() {
 		return this.location;
-	}*/
-	
+	}*/	
 
 	public String getName() {
 		return this.name;

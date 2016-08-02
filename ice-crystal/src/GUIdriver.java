@@ -1,5 +1,4 @@
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -8,11 +7,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -154,8 +153,32 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 		infoPanel.removeAll();
 		infoPanel.add(new JLabel("   Locations"));
 		for (ImageMarker im : selected) {
-			// TODO: Add functionality
-			infoPanel.add(new JButton(im.getName()));
+			// TODO: Add functionalityJButton b = new JButton();
+
+			JButton button = new JButton();
+			button.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					HashMap<String, Double> archs = CSVParser.archLocations.get(im.getName().toUpperCase());
+					
+					System.out.println("\n------" + im.getName() + "------");
+					//System.out.println(archs);
+					for (String arch : archs.keySet()) {
+						System.out.println(arch + ": " + archs.get(arch));
+					}
+					
+				}
+			});
+			try {
+				button.setLayout(new BorderLayout());
+				JLabel label1 = new JLabel(im.getName());
+				DecimalFormat formatter = new DecimalFormat("#,###.00");
+				JLabel label2 = new JLabel("$" + String.valueOf(formatter.format(CSVParser.round(CSVParser.locations.get(im.getName().toUpperCase()), 2))));
+				button.add(BorderLayout.NORTH,label1);
+				button.add(BorderLayout.SOUTH,label2);
+				infoPanel.add(button);
+			} catch (NullPointerException e) {
+				infoPanel.add(new JButton (im.getName()));
+			}
 		}
 		infoPanel.setPreferredSize(new Dimension(300, 20 * selected.size()));
 		infoPanel.revalidate();
