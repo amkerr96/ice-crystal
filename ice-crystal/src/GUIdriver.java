@@ -18,6 +18,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+
+import org.knowm.xchart.PieChart;
+import org.knowm.xchart.PieChartBuilder;
+import org.knowm.xchart.SwingWrapper;
+import org.knowm.xchart.XChartPanel;
+import org.knowm.xchart.style.PieStyler.AnnotationType;
+import org.knowm.xchart.style.Styler.ChartTheme;
 
 public class GUIdriver extends JFrame implements PropertyChangeListener {
 
@@ -153,7 +161,7 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 		infoPanel.removeAll();
 		infoPanel.add(new JLabel("   Locations"));
 		for (ImageMarker im : selected) {
-			// TODO: Add functionalityJButton b = new JButton();
+			// TODO: Add functionality
 
 			JButton button = new JButton();
 			button.addActionListener(new ActionListener() {
@@ -161,11 +169,11 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 					HashMap<String, Double> archs = CSVParser.archLocations.get(im.getName().toUpperCase());
 					
 					System.out.println("\n------" + im.getName() + "------");
-					//System.out.println(archs);
 					for (String arch : archs.keySet()) {
 						System.out.println(arch + ": " + archs.get(arch));
 					}
 					
+					PieChartDemo(im);
 				}
 			});
 			try {
@@ -239,4 +247,63 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 	public void applyFilter(String state, boolean on) {
 		map.selectGroup(state, on);
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public void PieChartDemo(ImageMarker im) {
+
+	    // Create Chart
+	    PieChart chart = new PieChartBuilder().width(400).height(300).title("My Pie Chart").theme(ChartTheme.GGPlot2).build();
+
+	    // Customize Chart
+	    chart.getStyler().setLegendVisible(false);
+	    chart.getStyler().setAnnotationType(AnnotationType.LabelAndPercentage);
+	    chart.getStyler().setAnnotationDistance(1.15);
+	    chart.getStyler().setPlotContentSize(.7);
+	    chart.getStyler().setStartAngleInDegrees(90);
+	     
+		HashMap<String, Double> archs = CSVParser.archLocations.get(im.getName().toUpperCase());
+		
+		System.out.println("\n------" + im.getName() + "------");
+		for (String arch : archs.keySet()) {
+			//System.out.println(arch + ": " + archs.get(arch));
+			chart.addSeries(arch + "\n " + String.valueOf(archs.get(arch)), archs.get(arch));
+		}
+
+	    // Show it
+	    new SwingWrapper(chart).displayChart();
+	 
+	      JFrame frame = new JFrame("Pie Chart Example");
+	      frame.setLayout(new BorderLayout());
+	      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+	      // chart
+	      JPanel chartPanel = new XChartPanel<PieChart>(chart);
+	      frame.add(chartPanel, BorderLayout.CENTER);
+
+	      // label
+	      JLabel label = new JLabel("She got the booty", SwingConstants.CENTER);
+	      frame.add(label, BorderLayout.SOUTH);
+
+	      // Display the window.
+	      frame.pack();
+	      frame.setVisible(true);
+	    }
 }
