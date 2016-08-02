@@ -144,21 +144,40 @@ public class SimpleMapApp extends PApplet {
 			oldSelected.add(i);
 		}
 		
-		println((add?"Adding ":"Removing ") + "all from " + state);
-		
-		for(String s: CSVParser.states.keySet()) {
-			if(add) {
-				if(!locations.containsKey(s)) {
-					newSelected.add(locations.get(s));
-		    		locations.get(s).setImage(loadImage("ui/marker_red.png"));
-				}
-			} else {
-				if(locations.containsKey(s)) {
-					newSelected.remove(locations.get(s));
-		    		locations.get(s).setImage(loadImage("ui/marker_gray.png"));
+		if(state.equals("all")) {
+			for(String s: locations.keySet()) {
+				if(add) {
+					if(!selected.contains(locations.get(s))) {
+						newSelected.add(locations.get(s));
+			    		locations.get(s).setImage(loadImage("ui/marker_red.png"));
+					}
+				} else {
+					if(selected.contains(locations.get(s))) {
+						newSelected.remove(locations.get(s));
+			    		locations.get(s).setImage(loadImage("ui/marker_gray.png"));
+					}
 				}
 			}
-		}
+		} else {
+			println((add?"Adding ":"Removing ") + "all from " + state);
+	
+			for(String s: CSVParser.states.keySet()) {
+				String st = CSVParser.states.get(s);
+				if(st.equals(state)) {
+					if(add) {
+						if(!selected.contains(locations.get(s))) {
+							newSelected.add(locations.get(s));
+				    		locations.get(s).setImage(loadImage("ui/marker_red.png"));
+						}
+					} else {
+						if(selected.contains(locations.get(s))) {
+							newSelected.remove(locations.get(s));
+				    		locations.get(s).setImage(loadImage("ui/marker_gray.png"));
+						}
+					}
+				}
+			}
+		} 
 		
 		selected = newSelected;
 	    changes.firePropertyChange("selected", oldSelected, newSelected);

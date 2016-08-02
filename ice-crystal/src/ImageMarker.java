@@ -7,7 +7,7 @@ import de.fhpotsdam.unfolding.marker.AbstractMarker;
 /**
  * This marker displays an image at its location.
  */
-public class ImageMarker extends AbstractMarker {
+public class ImageMarker extends AbstractMarker implements Comparable {
 
 	private PImage img;
 	private String name;
@@ -45,6 +45,12 @@ public class ImageMarker extends AbstractMarker {
 	
 	public void setImage(PImage img) {
 		this.img = img;
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		ImageMarker im = (ImageMarker) o;
+		return this.getName().compareTo(im.getName());
 	}
 	
 }
