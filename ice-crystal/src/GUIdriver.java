@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,7 +19,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.knowm.xchart.PieChart;
 import org.knowm.xchart.PieChartBuilder;
@@ -36,12 +40,16 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 	SimpleMapApp map;
 	JPanel container;
 	JPanel mapPanel;
-	JPanel infoPanel;
+	JPanel selectedPanel;
 	JPanel settingsPanel;
 	JPanel filtersPanel;
 	JScrollPane stateScroll;
+	JPanel infoPanel;
+	JLabel sliderLabel;
+	JPanel pieChartPanel;
 
 	public GUIdriver() {
+
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(1400, 800);
 		this.setLayout(new BorderLayout());
@@ -50,17 +58,18 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 		settingsPanel = new JPanel();
 		mapPanel = new JPanel();
 		infoPanel = new JPanel();
+		selectedPanel = new JPanel();
 
 		// For testing
 		/*
 		 * settingsPanel.setBackground(Color.GREEN);
 		 * mapPanel.setBackground(Color.RED);
-		 * infoPanel.setBackground(Color.BLUE);
+		 * selectedPanel.setBackground(Color.BLUE);
 		 */
 
 		settingsPanel.setPreferredSize(new Dimension(200, 800));
 		mapPanel.setPreferredSize(new Dimension(900, 800));
-		// infoPanel.setPreferredSize(new Dimension(190, 590));
+		// selectedPanel.setPreferredSize(new Dimension(190, 590));
 
 		// Panel settings
 		settingsPanel.setLayout(new GridLayout(3, 1));
@@ -70,39 +79,12 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 
 		panel_1.setLayout(new GridLayout(3, 1));
 
+		JPanel filtersContainer = new JPanel();
+		filtersContainer.setLayout(new BorderLayout());
 		filtersPanel.setLayout(new FlowLayout());
 		stateScroll = new JScrollPane(filtersPanel);
 		stateScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		stateScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-		panel_3.setLayout(new GridLayout(3, 1));
-
-		settingsPanel.add(panel_1);
-		settingsPanel.add(stateScroll);
-		settingsPanel.add(panel_3);
-
-		// File button
-		JButton fileButton = new JButton("Select IB Report");
-		fileButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String fileName = CSVParser.chooseFile();
-				if (fileName != null) {
-					CSVParser.parseFile(fileName);
-					map.draw2();
-
-					ArrayList<String> states = CSVParser.getStates();
-					updateFilters(states);
-					// System.out.println(states);
-					// updateFilters(states);
-				}
-			}
-		});
-		panel_1.add(new JPanel());
-		panel_1.add(fileButton);
-		JPanel filtersP = new JPanel();
-		filtersP.setLayout(new BorderLayout());
-		filtersP.add(new JLabel("Filters: "), BorderLayout.SOUTH);
-		panel_1.add(filtersP);
 
 		// Filter all button
 		JButton filterAll = new JButton("All");
@@ -127,26 +109,72 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 				}
 			}
 		});
-		JPanel filtersAllP = new JPanel();
-		filtersAllP.setLayout(new BorderLayout());
-		filtersAllP.add(filterAll, BorderLayout.NORTH);
-		panel_3.add(filtersAllP);
 
-		// Panel info
-		infoPanel.setLayout(new FlowLayout()/*BoxLayout(infoPanel, BoxLayout.Y_AXIS)*/);
-		//infoPanel.setPreferredSize(new Dimension(300,1000));
-		infoPanel.add(new JLabel("   Locations"));
+		filtersContainer.add(new JLabel("Select by location: "), BorderLayout.NORTH);
+		filtersContainer.add(stateScroll, BorderLayout.CENTER);
+		filtersContainer.add(filterAll, BorderLayout.SOUTH);
+
+		panel_3.setLayout(new GridLayout(3, 1));
+
+		settingsPanel.add(panel_1);
+		settingsPanel.add(filtersContainer);
+		settingsPanel.add(panel_3);
+
+		// File button
+		JButton fileButton = new JButton("Select IB Report");
+		fileButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String fileName = CSVParser.chooseFile();
+				if (fileName != null) {
+					CSVParser.parseFile(fileName);
+					map.draw2();
+
+					ArrayList<String> states = CSVParser.getStates();
+					updateFilters(states);
+					// System.out.println(states);
+					// updateFilters(states);
+
+					sliderLabel = new JLabel("Filter by spend:");
+
+					int min = (int) Math.floor(map.getMinSpend());
+					int max = (int) Math.ceil(map.getMaxSpend());
+
+					JSlider spendSlider = new JSlider(min, max);
+
+					System.out.println("Spend: " + min + " - " + max);
+					spendSlider.setMajorTickSpacing(max / 3);
+					spendSlider.setMinorTickSpacing(max / 9);
+					spendSlider.setPaintTicks(true);
+					spendSlider.setPaintLabels(true);
+					spendSlider.addChangeListener(new SliderListener());
+
+					panel_1.add(sliderLabel, BorderLayout.CENTER);
+					panel_1.add(spendSlider, BorderLayout.SOUTH);
+					panel_1.revalidate();
+					panel_1.repaint();
+				}
+			}
+		});
+		panel_1.add(fileButton);
+
+		infoPanel.setLayout(new GridLayout(2, 1));
+		selectedPanel.setLayout(new FlowLayout());
+		selectedPanel.add(new JLabel("Locations:"));
 
 		// Make info scrollable
-		JScrollPane scrollPane = new JScrollPane(infoPanel);
+		JScrollPane scrollPane = new JScrollPane(selectedPanel);
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setPreferredSize(new Dimension(300, 800));
+		scrollPane.setPreferredSize(new Dimension(300, 400));
+
+		pieChartPanel = new JPanel();
 
 		// Create
 		this.add(settingsPanel, BorderLayout.WEST);
 		this.add(mapPanel, BorderLayout.CENTER);
-		this.add(scrollPane, BorderLayout.EAST);
+		infoPanel.add(scrollPane);
+		infoPanel.add(pieChartPanel);
+		this.add(infoPanel, BorderLayout.EAST);
 		this.pack();
 		this.setVisible(true);
 
@@ -157,40 +185,41 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 		map.init();
 	}
 
-	public void updateInfoPanel(ArrayList<ImageMarker> selected) {
-		infoPanel.removeAll();
-		infoPanel.add(new JLabel("   Locations"));
-		for (ImageMarker im : selected) {
+	public void updateSelectedPanel(ArrayList<LocationMarker> selected) {
+		selectedPanel.removeAll();
+		selectedPanel.add(new JLabel("   Locations"));
+		for (LocationMarker im : selected) {
 			// TODO: Add functionality
 
 			JButton button = new JButton();
 			button.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					HashMap<String, Double> archs = CSVParser.archLocations.get(im.getName().toUpperCase());
-					
+
 					System.out.println("\n------" + im.getName() + "------");
 					for (String arch : archs.keySet()) {
 						System.out.println(arch + ": " + archs.get(arch));
 					}
-					
-					PieChartDemo(im);
+
+					drawPieChart(im);
 				}
 			});
 			try {
 				button.setLayout(new BorderLayout());
 				JLabel label1 = new JLabel(im.getName());
 				DecimalFormat formatter = new DecimalFormat("#,###.00");
-				JLabel label2 = new JLabel("$" + String.valueOf(formatter.format(CSVParser.round(CSVParser.locations.get(im.getName().toUpperCase()), 2))));
-				button.add(BorderLayout.NORTH,label1);
-				button.add(BorderLayout.SOUTH,label2);
-				infoPanel.add(button);
+				JLabel label2 = new JLabel("$" + String.valueOf(
+						formatter.format(CSVParser.round(CSVParser.locations.get(im.getName().toUpperCase()), 2))));
+				button.add(BorderLayout.NORTH, label1);
+				button.add(BorderLayout.SOUTH, label2);
+				selectedPanel.add(button);
 			} catch (NullPointerException e) {
-				infoPanel.add(new JButton (im.getName()));
+				selectedPanel.add(new JButton(im.getName()));
 			}
 		}
-		infoPanel.setPreferredSize(new Dimension(300, 20 * selected.size()));
-		infoPanel.revalidate();
-		infoPanel.repaint();
+		selectedPanel.setPreferredSize(new Dimension(300, 20 * selected.size()));
+		selectedPanel.revalidate();
+		selectedPanel.repaint();
 		/*
 		 * System.out.print("Selected: "); for(ImageMarker i: selected) {
 		 * System.out.print(i.getName() + ", "); } System.out.println();
@@ -199,9 +228,9 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		ArrayList<ImageMarker> sel = map.getSelected();
+		ArrayList<LocationMarker> sel = map.getSelected();
 		Collections.sort(sel);
-		updateInfoPanel(sel);
+		updateSelectedPanel(sel);
 	}
 
 	protected ImageIcon createImageIcon(String path, String description) {
@@ -247,63 +276,66 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 	public void applyFilter(String state, boolean on) {
 		map.selectGroup(state, on);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	public void PieChartDemo(ImageMarker im) {
 
-	    // Create Chart
-	    PieChart chart = new PieChartBuilder().width(400).height(300).title("My Pie Chart").theme(ChartTheme.GGPlot2).build();
+	public void drawPieChart(LocationMarker im) {
+		try {
+			pieChartPanel.remove(pieChartPanel.getComponent(0));
 
-	    // Customize Chart
-	    chart.getStyler().setLegendVisible(false);
-	    chart.getStyler().setAnnotationType(AnnotationType.LabelAndPercentage);
-	    chart.getStyler().setAnnotationDistance(1.15);
-	    chart.getStyler().setPlotContentSize(.7);
-	    chart.getStyler().setStartAngleInDegrees(90);
-	     
+		} catch (ArrayIndexOutOfBoundsException e) {
+			//
+		}
+		// Create Chart
+		PieChart chart = new PieChartBuilder().width(300).height(400).title("Data for " + im.getName()).theme(ChartTheme.GGPlot2)
+				.build();
+
+		// Customize Chart
+		chart.getStyler().setLegendVisible(false);
+		chart.getStyler().setAnnotationType(AnnotationType.LabelAndPercentage);
+		chart.getStyler().setAnnotationDistance(1.15);
+		chart.getStyler().setPlotContentSize(.7);
+		chart.getStyler().setStartAngleInDegrees(90);
+
 		HashMap<String, Double> archs = CSVParser.archLocations.get(im.getName().toUpperCase());
-		
+
 		System.out.println("\n------" + im.getName() + "------");
 		for (String arch : archs.keySet()) {
-			//System.out.println(arch + ": " + archs.get(arch));
+			// System.out.println(arch + ": " + archs.get(arch));
 			chart.addSeries(arch + "\n " + String.valueOf(archs.get(arch)), archs.get(arch));
 		}
 
-	    // Show it
-	    new SwingWrapper(chart).displayChart();
-	 
-	      JFrame frame = new JFrame("Pie Chart Example");
-	      frame.setLayout(new BorderLayout());
-	      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		// Show it
+		//new SwingWrapper(chart).displayChart();
 
-	      // chart
-	      JPanel chartPanel = new XChartPanel<PieChart>(chart);
-	      frame.add(chartPanel, BorderLayout.CENTER);
+		JPanel frame = new JPanel();
+		frame.setLayout(new BorderLayout());
 
-	      // label
-	      JLabel label = new JLabel("She got the booty", SwingConstants.CENTER);
-	      frame.add(label, BorderLayout.SOUTH);
+		// chart
+		JPanel chartPanel = new XChartPanel<PieChart>(chart);
+		frame.add(chartPanel, BorderLayout.CENTER);
 
-	      // Display the window.
-	      frame.pack();
-	      frame.setVisible(true);
-	    }
+		// label
+		JLabel label = new JLabel("Pie Chart", SwingConstants.CENTER);
+		frame.add(label, BorderLayout.SOUTH);
+
+		// Display the window.
+		pieChartPanel.add(frame);
+		pieChartPanel.revalidate();
+		pieChartPanel.repaint();
+	}
+
+	class SliderListener implements ChangeListener {
+
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			JSlider source = (JSlider) e.getSource();
+			if (!source.getValueIsAdjusting()) {
+				NumberFormat formatter = NumberFormat.getCurrencyInstance();
+				sliderLabel.setText("Fliter by spend: > " + formatter.format(source.getValue()));
+				filterLabelsBySpend(source.getValue());
+			}
+		}
+	}
+
+	public void filterLabelsBySpend(int value) {
+	}
 }

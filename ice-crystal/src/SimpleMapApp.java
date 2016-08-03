@@ -28,12 +28,17 @@ public class SimpleMapApp extends PApplet {
 	UnfoldingMap map2;
 	UnfoldingMap map3;
 	int numLocations;
+	private double minSpend;
+	private double maxSpend;
 	
-	HashMap<String, ImageMarker> locations = new HashMap<String, ImageMarker>();
-	ArrayList<ImageMarker> selected = new ArrayList<ImageMarker>();
+	HashMap<String, LocationMarker> locations = new HashMap<String, LocationMarker>();
+	ArrayList<LocationMarker> selected = new ArrayList<LocationMarker>();
 	ToponymSearchCriteria searchCriteria = new ToponymSearchCriteria();
 
 	public void setup() {
+		minSpend = Double.MAX_VALUE;
+		maxSpend = Double.MIN_VALUE;
+		
 		size(900, 800, OPENGL);
 
 		map1 = new UnfoldingMap(this, new Google.GoogleMapProvider());
@@ -66,8 +71,14 @@ public class SimpleMapApp extends PApplet {
 				
 				if(!locations.containsKey(loc)) {
 					// Put other data in here
-					locations.put(loc, new ImageMarker(toponym.getName(), coord, loadImage("ui/marker_gray.png")));
-				}
+					double spend = CSVParser.locations.get(loc);
+					locations.put(loc, new LocationMarker(toponym.getName(), coord, spend, loadImage("ui/marker_gray.png")));
+					if(spend > maxSpend) {
+						maxSpend = spend;
+					} 
+					if(spend < minSpend) {
+						minSpend = spend;
+					}				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -99,14 +110,14 @@ public class SimpleMapApp extends PApplet {
 	}
 	
 	public void mouseClicked() {
-		ArrayList<ImageMarker> newSelected = new ArrayList<ImageMarker>();
-		ArrayList<ImageMarker> oldSelected = new ArrayList<ImageMarker>();
-		for(ImageMarker i : selected) {
+		ArrayList<LocationMarker> newSelected = new ArrayList<LocationMarker>();
+		ArrayList<LocationMarker> oldSelected = new ArrayList<LocationMarker>();
+		for(LocationMarker i : selected) {
 			newSelected.add(i);
 			oldSelected.add(i);
 		}
-	    ImageMarker hitMarker = (ImageMarker) currentMap.getDefaultMarkerManager().getNearestMarker(mouseX, mouseY);
-	    println("\nClick! Hit marker: " + hitMarker.getName() + hitMarker.getLocation());
+	    LocationMarker hitMarker = (LocationMarker) currentMap.getDefaultMarkerManager().getNearestMarker(mouseX, mouseY);
+	    println("\nClick! Hit marker: " + hitMarker.getName() + hitMarker.getLocation() + hitMarker.getSpend());
 	    if(currentMap.getScreenPosition(hitMarker.getLocation()).dist(new ScreenPosition(mouseX, mouseY)) < 14/*magic #*/) {
 	    	if(selected.contains(hitMarker)) {
 	    		hitMarker.setImage(loadImage("ui/marker_gray.png"));
@@ -132,14 +143,14 @@ public class SimpleMapApp extends PApplet {
 		changes.removePropertyChangeListener(l);
 	}
 	
-	public ArrayList<ImageMarker> getSelected() {
+	public ArrayList<LocationMarker> getSelected() {
 		return selected;
 	}
 	
 	public void selectGroup(String state, boolean add) {
-		ArrayList<ImageMarker> newSelected = new ArrayList<ImageMarker>();
-		ArrayList<ImageMarker> oldSelected = new ArrayList<ImageMarker>();
-		for(ImageMarker i : selected) {
+		ArrayList<LocationMarker> newSelected = new ArrayList<LocationMarker>();
+		ArrayList<LocationMarker> oldSelected = new ArrayList<LocationMarker>();
+		for(LocationMarker i : selected) {
 			newSelected.add(i);
 			oldSelected.add(i);
 		}
@@ -183,4 +194,12 @@ public class SimpleMapApp extends PApplet {
 	    changes.firePropertyChange("selected", oldSelected, newSelected);
 		map1.getDefaultMarkerManager().draw();
 	}
+	
+	public double getMaxSpend() {
+		return maxSpend;
+	}
+	
+	public double getMinSpend() {
+		return minSpend;
+	}			
 }
