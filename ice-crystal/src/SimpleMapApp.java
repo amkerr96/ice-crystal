@@ -128,19 +128,21 @@ public class SimpleMapApp extends PApplet {
 	}
 
 	public void mouseClicked() {
-		LocationMarker hitMarker = (LocationMarker) currentMap.getDefaultMarkerManager().getNearestMarker(mouseX,
-				mouseY);
-		println("\nClick! Hit marker: " + hitMarker.getName() + hitMarker.getLocation() + hitMarker.getSpend());
-		if (currentMap.getScreenPosition(hitMarker.getLocation())
-				.dist(new ScreenPosition(mouseX, mouseY)) < 14/* magic # */) {
-			if (selected.contains(hitMarker)) {
-				selected.remove(hitMarker);
+		if (GUIdriver.fileSelected) {
+			LocationMarker hitMarker = (LocationMarker) currentMap.getDefaultMarkerManager().getNearestMarker(mouseX,
+					mouseY);
+			println("\nClick! Hit marker: " + hitMarker.getName() + hitMarker.getLocation() + hitMarker.getSpend());
+			if (currentMap.getScreenPosition(hitMarker.getLocation())
+					.dist(new ScreenPosition(mouseX, mouseY)) < 14/* magic # */) {
+				if (selected.contains(hitMarker)) {
+					selected.remove(hitMarker);
+				} else {
+					selected.add(hitMarker);
+				}
+				updateMarkers();
 			} else {
-				selected.add(hitMarker);
+				println("Too far away!");
 			}
-			updateMarkers();
-		} else {
-			println("Too far away!");
 		}
 	}
 

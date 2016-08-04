@@ -48,6 +48,7 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 	JLabel sliderLabel;
 	JPanel pieChartPanel;
 	private ArrayList<String> locationFilters;
+	static boolean fileSelected;
 
 
 	public GUIdriver() {
@@ -127,6 +128,7 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 		JButton fileButton = new JButton("Select IB Report");
 		fileButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				fileSelected = true;
 				String fileName = CSVParser.chooseFile();
 				if (fileName != null) {
 					CSVParser.parseFile(fileName);
@@ -290,23 +292,24 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 			//
 		}
 		// Create Chart
-		PieChart chart = new PieChartBuilder().width(300).height(400).title("Data for " + im.getName()).theme(ChartTheme.GGPlot2)
-				.build();
+				PieChart chart = new PieChartBuilder().width(300).height(400).title("Architecture % in " + im.getName()).theme(ChartTheme.GGPlot2)
+						.build();
 
-		// Customize Chart
-		chart.getStyler().setLegendVisible(false);
-		chart.getStyler().setAnnotationType(AnnotationType.LabelAndPercentage);
-		chart.getStyler().setAnnotationDistance(1.15);
-		chart.getStyler().setPlotContentSize(.7);
-		chart.getStyler().setStartAngleInDegrees(90);
+				// Customize Chart
+				chart.getStyler().setLegendVisible(false);
+				chart.getStyler().setAnnotationType(AnnotationType.LabelAndPercentage);
+				chart.getStyler().setDrawAllAnnotations(true);
+				chart.getStyler().setAnnotationDistance(1.14);
+				chart.getStyler().setPlotContentSize(.6);
+				chart.getStyler().setStartAngleInDegrees(90);
 
-		HashMap<String, Double> archs = CSVParser.archLocations.get(im.getName().toUpperCase());
+				HashMap<String, Double> archs = CSVParser.archLocations.get(im.getName().toUpperCase());
 
-		System.out.println("\n------" + im.getName() + "------");
-		for (String arch : archs.keySet()) {
-			// System.out.println(arch + ": " + archs.get(arch));
-			chart.addSeries(arch + "\n " + String.valueOf(archs.get(arch)), archs.get(arch));
-		}
+				System.out.println("\n------" + im.getName() + "------");
+				for (String arch : archs.keySet()) {
+					System.out.println(arch + ": " + archs.get(arch));
+					chart.addSeries(arch, archs.get(arch));
+				}
 
 		// Show it
 		//new SwingWrapper(chart).displayChart();
