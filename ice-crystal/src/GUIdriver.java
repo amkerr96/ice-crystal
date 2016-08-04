@@ -47,9 +47,12 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 	JPanel infoPanel;
 	JLabel sliderLabel;
 	JPanel pieChartPanel;
+	private ArrayList<String> locationFilters;
+
 
 	public GUIdriver() {
-
+		locationFilters = new ArrayList<String>();
+		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(1400, 800);
 		this.setLayout(new BorderLayout());
@@ -92,7 +95,7 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 			public void actionPerformed(ActionEvent e) {
 				if (filterAll.isSelected()) {
 					filterAll.setSelected(false);
-					applyFilter("all", false);
+					map.removeAll();
 					for (Component c : filtersPanel.getComponents()) {
 						if (c instanceof JButton) {
 							((JButton) c).setSelected(false);
@@ -100,7 +103,7 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 					}
 				} else {
 					filterAll.setSelected(true);
-					applyFilter("all", true);
+					map.addAll();
 					for (Component c : filtersPanel.getComponents()) {
 						if (c instanceof JButton) {
 							((JButton) c).setSelected(true);
@@ -137,21 +140,25 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 					sliderLabel = new JLabel("Filter by spend:");
 
 					int min = (int) Math.floor(map.getMinSpend());
-					int max = (int) Math.ceil(map.getMaxSpend());
+					int max = 10000;//(int) Math.ceil(map.getMaxSpend());
 
-					JSlider spendSlider = new JSlider(min, max);
+					
+					JSlider spendSlider = new JSlider(0, max);
 
 					System.out.println("Spend: " + min + " - " + max);
 					spendSlider.setMajorTickSpacing(max / 3);
 					spendSlider.setMinorTickSpacing(max / 9);
 					spendSlider.setPaintTicks(true);
 					spendSlider.setPaintLabels(true);
+					spendSlider.setValue(0);
 					spendSlider.addChangeListener(new SliderListener());
 
 					panel_1.add(sliderLabel, BorderLayout.CENTER);
 					panel_1.add(spendSlider, BorderLayout.SOUTH);
 					panel_1.revalidate();
 					panel_1.repaint();
+					
+					System.out.println(CSVParser.archLocations);
 				}
 			}
 		});
@@ -228,7 +235,7 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		ArrayList<LocationMarker> sel = map.getSelected();
+		ArrayList<LocationMarker> sel = map.getDrawn();
 		Collections.sort(sel);
 		updateSelectedPanel(sel);
 	}
@@ -257,11 +264,13 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 			b.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					if (b.isSelected()) {
+						locationFilters.remove(s);
 						b.setSelected(false);
-						applyFilter(s, false);
+						map.removeByLocation(s);
 					} else {
+						locationFilters.add(s);
 						b.setSelected(true);
-						applyFilter(s, true);
+						map.addByLocation(s);
 					}
 				}
 			});
@@ -271,10 +280,6 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 
 		stateScroll.revalidate();
 		stateScroll.repaint();
-	}
-
-	public void applyFilter(String state, boolean on) {
-		map.selectGroup(state, on);
 	}
 
 	public void drawPieChart(LocationMarker im) {
@@ -324,18 +329,17 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 	}
 
 	class SliderListener implements ChangeListener {
-
 		@Override
 		public void stateChanged(ChangeEvent e) {
 			JSlider source = (JSlider) e.getSource();
 			if (!source.getValueIsAdjusting()) {
 				NumberFormat formatter = NumberFormat.getCurrencyInstance();
 				sliderLabel.setText("Fliter by spend: > " + formatter.format(source.getValue()));
-				filterLabelsBySpend(source.getValue());
+				map.setSpendFilter(source.getValue());
+				ArrayList<LocationMarker> sel = map.getDrawn();
+				Collections.sort(sel);
+				updateSelectedPanel(sel);
 			}
 		}
-	}
-
-	public void filterLabelsBySpend(int value) {
 	}
 }

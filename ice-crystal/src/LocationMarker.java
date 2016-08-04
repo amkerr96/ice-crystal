@@ -12,7 +12,7 @@ public class LocationMarker extends AbstractMarker implements Comparable {
 	private PImage img;
 	private String name;
 	private double spend;
-	private boolean visible;
+	private boolean on;
 	//private Something otherDataGoesHere;
 
 	public LocationMarker(String name, Location location, double spend, PImage img) {
@@ -20,7 +20,7 @@ public class LocationMarker extends AbstractMarker implements Comparable {
 		this.img = img;
 		this.name = name;
 		this.spend = spend;
-		visible = true;
+		on = false;
 	}
 
 	@Override
@@ -60,12 +60,12 @@ public class LocationMarker extends AbstractMarker implements Comparable {
 		return spend;
 	}
 	
-	public boolean getVisible() {
-		return visible;
+	public boolean getOn() {
+		return on;
 	}
 	
-	public void setVisible(boolean vis) {
-		visible = vis;
+	public void setOn(boolean o) {
+		on = o;
 	}
 	
 }
