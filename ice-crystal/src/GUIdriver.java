@@ -15,6 +15,7 @@ import java.util.HashMap;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -49,11 +50,12 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 	JPanel pieChartPanel;
 	private ArrayList<String> locationFilters;
 	static boolean fileSelected;
-
+	private ArrayList<String> architectures;
+	private String archFilter;
 
 	public GUIdriver() {
 		locationFilters = new ArrayList<String>();
-		
+
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(1400, 800);
 		this.setLayout(new BorderLayout());
@@ -118,11 +120,9 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 		filtersContainer.add(stateScroll, BorderLayout.CENTER);
 		filtersContainer.add(filterAll, BorderLayout.SOUTH);
 
-		panel_3.setLayout(new GridLayout(3, 1));
+		panel_3.setLayout(new GridLayout(3,1));
 
 		settingsPanel.add(panel_1);
-		settingsPanel.add(filtersContainer);
-		settingsPanel.add(panel_3);
 
 		// File button
 		JButton fileButton = new JButton("Select IB Report");
@@ -132,6 +132,7 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 				String fileName = CSVParser.chooseFile();
 				if (fileName != null) {
 					CSVParser.parseFile(fileName);
+					architectures = CSVParser.architectures;
 					map.draw2();
 
 					ArrayList<String> states = CSVParser.getStates();
@@ -142,12 +143,11 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 					sliderLabel = new JLabel("Filter by spend:");
 
 					int min = (int) Math.floor(map.getMinSpend());
-					int max = 10000;//(int) Math.ceil(map.getMaxSpend());
+					int max = (int) Math.ceil(map.getMaxSpend()) / 2;
 
-					
 					JSlider spendSlider = new JSlider(0, max);
 
-					System.out.println("Spend: " + min + " - " + max);
+					//System.out.println("Spend: " + min + " - " + max);
 					spendSlider.setMajorTickSpacing(max / 3);
 					spendSlider.setMinorTickSpacing(max / 9);
 					spendSlider.setPaintTicks(true);
@@ -160,7 +160,32 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 					panel_1.revalidate();
 					panel_1.repaint();
 					
-					System.out.println(CSVParser.archLocations);
+					architectures.add(0, "All");
+					JComboBox archList = new JComboBox(architectures.toArray());
+					archList.setSelectedIndex(0);
+					archList.addActionListener(new ActionListener() {
+
+						public void actionPerformed(ActionEvent e) {
+					        JComboBox cb = (JComboBox)e.getSource();
+					        String archFilter = (String)cb.getSelectedItem();
+							map.setArchFilter(archFilter);
+							ArrayList<LocationMarker> sel = map.getDrawn();
+							Collections.sort(sel);
+							updateSelectedPanel(sel);
+						}
+						
+					});
+					
+					JPanel archLabel = new JPanel();
+					archLabel.setLayout(new BorderLayout());
+					archLabel.add(new JLabel("Filter by Architecture"), BorderLayout.SOUTH);
+					panel_3.add(archLabel);
+					panel_3.add(archList);
+					
+					settingsPanel.add(filtersContainer);
+					settingsPanel.add(panel_3);
+					
+					//System.out.println("Arch: " + CSVParser.archLocations);
 				}
 			}
 		});
@@ -292,27 +317,27 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 			//
 		}
 		// Create Chart
-				PieChart chart = new PieChartBuilder().width(300).height(400).title("Architecture % in " + im.getName()).theme(ChartTheme.GGPlot2)
-						.build();
+		PieChart chart = new PieChartBuilder().width(300).height(400).title("Architecture % in " + im.getName())
+				.theme(ChartTheme.GGPlot2).build();
 
-				// Customize Chart
-				chart.getStyler().setLegendVisible(false);
-				chart.getStyler().setAnnotationType(AnnotationType.LabelAndPercentage);
-				chart.getStyler().setDrawAllAnnotations(true);
-				chart.getStyler().setAnnotationDistance(1.14);
-				chart.getStyler().setPlotContentSize(.6);
-				chart.getStyler().setStartAngleInDegrees(90);
+		// Customize Chart
+		chart.getStyler().setLegendVisible(false);
+		chart.getStyler().setAnnotationType(AnnotationType.LabelAndPercentage);
+		chart.getStyler().setDrawAllAnnotations(true);
+		chart.getStyler().setAnnotationDistance(1.14);
+		chart.getStyler().setPlotContentSize(.6);
+		chart.getStyler().setStartAngleInDegrees(90);
 
-				HashMap<String, Double> archs = CSVParser.archLocations.get(im.getName().toUpperCase());
+		HashMap<String, Double> archs = CSVParser.archLocations.get(im.getName().toUpperCase());
 
-				System.out.println("\n------" + im.getName() + "------");
-				for (String arch : archs.keySet()) {
-					System.out.println(arch + ": " + archs.get(arch));
-					chart.addSeries(arch, archs.get(arch));
-				}
+		System.out.println("\n------" + im.getName() + "------");
+		for (String arch : archs.keySet()) {
+			System.out.println(arch + ": " + archs.get(arch));
+			chart.addSeries(arch, archs.get(arch));
+		}
 
 		// Show it
-		//new SwingWrapper(chart).displayChart();
+		// new SwingWrapper(chart).displayChart();
 
 		JPanel frame = new JPanel();
 		frame.setLayout(new BorderLayout());
@@ -345,4 +370,5 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 			}
 		}
 	}
+	
 }

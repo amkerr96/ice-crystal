@@ -33,6 +33,7 @@ public class SimpleMapApp extends PApplet {
 	private double minSpend;
 	private double maxSpend;
 	private double spendFilter;
+	private String archFilter;
 
 	HashMap<String, LocationMarker> locations = new HashMap<String, LocationMarker>();
 	ArrayList<LocationMarker> selected = new ArrayList<LocationMarker>();
@@ -40,6 +41,7 @@ public class SimpleMapApp extends PApplet {
 	ToponymSearchCriteria searchCriteria = new ToponymSearchCriteria();
 
 	public void setup() {
+		archFilter = "All";
 		spendFilter = 0;
 		minSpend = Double.MAX_VALUE;
 		maxSpend = Double.MIN_VALUE;
@@ -81,7 +83,7 @@ public class SimpleMapApp extends PApplet {
 				if (!toponym.getName().equalsIgnoreCase(loc)) {
 					println(loc + " NOT FOUND!");
 				} else {
-					println("FOUND " + loc + " = " + toponym);
+					println("Found " + loc + " = " + toponym);
 					Location coord = new Location(toponym.getLatitude(), toponym.getLongitude());
 
 					if (!locations.containsKey(loc)) {
@@ -101,7 +103,8 @@ public class SimpleMapApp extends PApplet {
 				e.printStackTrace();
 			}
 		}
-		System.out.println(locations);
+		println("Done loading locations");
+		//System.out.println(locations);
 	}
 
 	public void draw() {
@@ -159,17 +162,17 @@ public class SimpleMapApp extends PApplet {
 	}
 
 	public void updateMarkers() {
-		//print("Selected: ");
+		/*print("Selected: ");
 		for(LocationMarker lm: selected) {
 			print(lm.getName() + ", ");
 		}
-		println();
+		println();*/
 		for(String s: locations.keySet()) {
 			locations.get(s).setImage(loadImage("ui/marker_gray.png"));
 			locations.get(s).setOn(false);
 		}
 		for(LocationMarker m: selected) {
-			if(m.getSpend() >= spendFilter) {
+			if(m.getSpend() >= spendFilter && (archFilter == "All" || CSVParser.archLocations.get(m.getName().toUpperCase()).containsKey(archFilter))) {
 				locations.get(m.getName().toUpperCase()).setImage(loadImage("ui/marker_red.png"));
 				locations.get(m.getName().toUpperCase()).setOn(true);
 			}
@@ -239,7 +242,7 @@ public class SimpleMapApp extends PApplet {
 	
 	public void setSpendFilter(int s) {
 		spendFilter = s;
-		//println("UPDATED SPEND FILTER");
+		println("Filtering by spend > " + s);
 		updateMarkers();
 	}
 	
@@ -251,6 +254,12 @@ public class SimpleMapApp extends PApplet {
 			}
 		}
 		return drawn;
+	}
+
+	public void setArchFilter(String a) {
+		println("Filter by architecture " + a);
+		archFilter = a;
+		updateMarkers();
 	}
 
 }

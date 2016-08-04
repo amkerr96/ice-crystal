@@ -15,6 +15,7 @@ public class CSVParser extends JFrame {
 	static HashMap<String, String> states = new HashMap<String, String>();
 	static HashMap<String, HashMap< String, Double>> archLocations = new HashMap<String, HashMap< String, Double>>();
 	static HashMap<String, HashMap< String, Integer>> prodLocations = new HashMap<String, HashMap< String, Integer>>();
+	static ArrayList<String> architectures = new ArrayList<String>();
 	
     public static void main(String [] args) {
     	frame = new JFrame("Unit Tester");
@@ -102,7 +103,6 @@ public class CSVParser extends JFrame {
         	String archGrp = null; //23
         	double spend = 0.0; //28        	     	
         	
-        	
         	int counter = 0;
         	try {
 	        	while ((line = br.readLine()) != null) {
@@ -120,6 +120,11 @@ public class CSVParser extends JFrame {
 		            	date = fields[16];
 		            	prodID = fields[22];
 		            	archGrp = fields[23];
+			        	
+			        	if(!architectures.contains(archGrp)) {
+			        		architectures.add(archGrp);
+			        	}
+			        	
 		            	if (!fields[28].equals("")) {
 		            		spend = round(Double.parseDouble(fields[28]), 2);
 		            	} else {
@@ -172,6 +177,7 @@ public class CSVParser extends JFrame {
 	        	}	
 //	        	System.out.println(locations.toString());
 //	        	System.out.println(archLocations.toString());
+	        	
     		} catch (ArrayIndexOutOfBoundsException e) {	
 
         	} catch(NullPointerException e) {
