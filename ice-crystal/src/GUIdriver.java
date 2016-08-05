@@ -182,6 +182,18 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 					panel_3.add(archLabel);
 					panel_3.add(archList);
 					
+					JButton ldosButton = new JButton("LDOS Button");
+					ldosButton.addActionListener(new ActionListener() {
+
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							// TODO Rylan add stuff here!
+							
+						}
+					
+					});
+					panel_3.add(ldosButton);
+					
 					settingsPanel.add(filtersContainer);
 					settingsPanel.add(panel_3);
 					
