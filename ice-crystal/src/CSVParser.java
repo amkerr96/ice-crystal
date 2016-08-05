@@ -98,19 +98,16 @@ public class CSVParser extends JFrame {
         	String state = null; //6
 //        	String zip = null; //7
         	String date = null; //16
-//        	String ldos = null; //17
+        	String ldos = null; //17
         	String prodID = null; //22
         	String archGrp = null; //23
-        	double spend = 0.0; //28        	     	
+        	double spend = 0.0; //28   
+        	int year = 0;
+        	int ldosYear = 0;
         	
         	int counter = 0;
         	try {
 	        	while ((line = br.readLine()) != null) {
-	        	//  Limited Testing
-	//        	while(counter < 13) {
-	//            	counter++;
-	//        		line=br.readLine();
-	//        		System.out.println(line);
 	        		
 	        		if (counter >= 4) {
 		            	String [] fields = line.split("\t", -1);
@@ -118,8 +115,16 @@ public class CSVParser extends JFrame {
 		            	city = fields[5];
 		            	state = fields[6];
 		            	date = fields[16];
+		            	year = Integer.parseInt(date.split("/")[0]);
+		            	ldos = fields[17];
+		            	if (!ldos.equals("<NULL>")) {
+		            		ldosYear = Integer.parseInt(ldos.split("/")[0]);
+		            	} else {
+		            		ldosYear = 99;
+		            	}
 		            	prodID = fields[22];
 		            	archGrp = fields[23];
+
 			        	
 			        	if(!architectures.contains(archGrp)) {
 			        		architectures.add(archGrp);
@@ -132,51 +137,57 @@ public class CSVParser extends JFrame {
 		            	}		   
 	            	
 		            	//System.out.printf("%s, %s, %s, %s, %s, %f\n", city, state, date, prodID, archGrp, spend);
-	        		
-		            	//Tier 1
-		            	if (locations.get(city) == null) {
-		            		locations.put(city, spend);
-		            		states.put(city, state);
-		            	} else {
-		            		locations.put(city, ((Double)locations.get(city)).doubleValue() + spend);
+		            	if (year >= 10 && year < 90) {
+//		            		System.out.println("Year: " + date.split("/")[1]);
+//		            		System.out.println("LDoS: " + ldosYear);
+		          	
+			            	//Tier 1 <location, spend>
+			            	if (locations.get(city) == null) {
+			            		locations.put(city, spend);
+			            		states.put(city, state);
+			            	} else {
+			            		locations.put(city, ((Double)locations.get(city)).doubleValue() + spend);
+			            	}
+			            	
+			            	//Tier 2 <architecture, spend>
+			            	HashMap<String, Double> archs = new HashMap<String, Double>();
+			            	if (archLocations.get(city) == null) {
+			            		archs.put(archGrp, spend);
+			            		archLocations.put(city, archs);
+			            	} else {
+			            		HashMap<String, Double> inner = archLocations.get(city);
+			            		if (inner.get(archGrp) == null) {
+			            			inner.put(archGrp, spend);
+			            		} else {
+			            			inner.put(archGrp, ((Double)inner.get(archGrp)).doubleValue() + spend);
+			            		}		            	
+			            		archLocations.put(city, inner);
+			            	}
+			            	
+			            	//Tier 3 <productID, numberInstalled>
+			            	HashMap<String, Integer> prods = new HashMap<String, Integer>();
+			            	if (prodLocations.get(city) == null) {
+			            		prods.put(prodID, 1);
+			            		prodLocations.put(city, prods);
+			            	} else {
+			            		HashMap<String, Integer> inner = prodLocations.get(city);
+			            		if (inner.get(prodID) == null) {
+			            			inner.put(prodID, 1);
+			            		} else {
+			            			inner.put(prodID, ((Integer)inner.get(prodID)).intValue() + 1);
+			            		}		            	
+			            		prodLocations.put(city, inner);
+			            	}
 		            	}
-		            	
-		            	//Tier 2
-		            	HashMap<String, Double> archs = new HashMap<String, Double>();
-		            	if (archLocations.get(city) == null) {
-		            		archs.put(archGrp, spend);
-		            		archLocations.put(city, archs);
-		            	} else {
-		            		HashMap<String, Double> inner = archLocations.get(city);
-		            		if (inner.get(archGrp) == null) {
-		            			inner.put(archGrp, spend);
-		            		} else {
-		            			inner.put(archGrp, ((Double)inner.get(archGrp)).doubleValue() + spend);
-		            		}		            	
-		            		archLocations.put(city, inner);
-		            	}
-		            	
-		            	//Tier 3 still in progress
-		            	HashMap<String, Double> prods = new HashMap<String, Double>();
-//		            	if (prodLocations.get(city) == null) {
-//		            		prods.put(prodID, spend);
-//		            		prodLocations.put(city, prods);
-//		            	} else {
-//		            		HashMap<String, Double> inner = prodLocations.get(city);
-//		            		if (inner.get(prodID) == null) {
-//		            			inner.put(prodID, spend);
-//		            		} else {
-//		            			inner.put(prodID, ((Double)inner.get(prodID)).doubleValue() + spend);
-//		            		}		            	
-//		            		prodLocations.put(city, inner);
-//		            	}		            	
-	        		
 	        		
 	        		}
 	        		counter++;
 	        	}	
-//	        	System.out.println(locations.toString());
-//	        	System.out.println(archLocations.toString());
+	        	
+	        	for (String loc : prodLocations.keySet()) {
+	        		System.out.println(loc);
+	        		System.out.println(prodLocations.get(loc).toString());
+	        	}
 	        	
     		} catch (ArrayIndexOutOfBoundsException e) {	
 
