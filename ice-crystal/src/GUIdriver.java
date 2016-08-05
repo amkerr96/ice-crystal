@@ -2,6 +2,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,7 +13,6 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -24,13 +24,13 @@ import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 import org.knowm.xchart.PieChart;
 import org.knowm.xchart.PieChartBuilder;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.style.PieStyler.AnnotationType;
 import org.knowm.xchart.style.Styler.ChartTheme;
+import org.knowm.xchart.style.Styler.LegendPosition;
 
 public class GUIdriver extends JFrame implements PropertyChangeListener {
 
@@ -317,27 +317,30 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 			//
 		}
 		// Create Chart
-		PieChart chart = new PieChartBuilder().width(300).height(400).title("Architecture % in " + im.getName())
-				.theme(ChartTheme.GGPlot2).build();
-
+		PieChart chart = new PieChartBuilder().width(300).height(400).title("Architecture % in " + im.getName()).theme(ChartTheme.GGPlot2).build();
+		
 		// Customize Chart
-		chart.getStyler().setLegendVisible(false);
-		chart.getStyler().setAnnotationType(AnnotationType.LabelAndPercentage);
+		chart.getStyler().setLegendVisible(true);
+		chart.getStyler().setAnnotationType(AnnotationType.Percentage);
 		chart.getStyler().setDrawAllAnnotations(true);
-		chart.getStyler().setAnnotationDistance(1.14);
-		chart.getStyler().setPlotContentSize(.6);
+		//chart.getStyler().setAnnotationDistance(1.15);
+		chart.getStyler().setPlotContentSize(.7);
 		chart.getStyler().setStartAngleInDegrees(90);
+		chart.getStyler().setLegendFont(new Font("TimesRoman", Font.PLAIN, 10));
+		chart.getStyler().setLegendPadding(1);
+		chart.getStyler().setLegendPosition(LegendPosition.InsideSE);
 
 		HashMap<String, Double> archs = CSVParser.archLocations.get(im.getName().toUpperCase());
 
 		System.out.println("\n------" + im.getName() + "------");
+		if (archs.keySet().size() > 4) {
+			chart.getStyler().setAnnotationDistance(1.15);
+		}
+		
 		for (String arch : archs.keySet()) {
 			System.out.println(arch + ": " + archs.get(arch));
 			chart.addSeries(arch, archs.get(arch));
 		}
-
-		// Show it
-		// new SwingWrapper(chart).displayChart();
 
 		JPanel frame = new JPanel();
 		frame.setLayout(new BorderLayout());
