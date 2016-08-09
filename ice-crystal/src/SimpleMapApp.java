@@ -31,6 +31,7 @@ public class SimpleMapApp extends PApplet {
 	private double maxSpend;
 	private double spendFilter;
 	private String archFilter;
+	private ArrayList<String> productIdFilter = new ArrayList<String>();
 
 	HashMap<String, LocationMarker> locations = new HashMap<String, LocationMarker>();
 	ArrayList<LocationMarker> selected = new ArrayList<LocationMarker>();
@@ -56,7 +57,7 @@ public class SimpleMapApp extends PApplet {
 	}
 
 	public void loadLocations() {
-
+		System.out.println("Loading locations");
 		String withState = null;
 
 		String[] locs = { "Raleigh", "Atlanta", "Charlotte North Carolina", "Nashville" };
@@ -66,7 +67,9 @@ public class SimpleMapApp extends PApplet {
 			searchCriteria.setQ(withState);
 			ToponymSearchResult searchResult;
 			try {
+				//System.out.println("Searching for " + searchCriteria);
 				searchResult = WebService.search(searchCriteria);
+				//System.out.println("Done searching for " + searchCriteria);
 				Toponym toponym = searchResult.getToponyms().get(0);
 				if(!toponym.getName().equalsIgnoreCase(loc)) {
 					List<Toponym> toponyms = searchResult.getToponyms();
@@ -169,9 +172,23 @@ public class SimpleMapApp extends PApplet {
 			locations.get(s).setOn(false);
 		}
 		for(LocationMarker m: selected) {
-			if(m.getSpend() >= spendFilter && (archFilter == "All" || CSVParser.archLocations.get(m.getName().toUpperCase()).containsKey(archFilter))) {
-				locations.get(m.getName().toUpperCase()).setImage(loadImage("ui/marker_red.png"));
-				locations.get(m.getName().toUpperCase()).setOn(true);
+			String name = m.getName().toUpperCase();
+			if(m.getSpend() >= spendFilter && (archFilter == "All" || CSVParser.archLocations.get(name).containsKey(archFilter))) {
+				boolean hasId = false;
+				HashMap<String, Integer> prods = CSVParser.prodLocations.get(name);
+				if(productIdFilter.isEmpty()) {
+					hasId = true;
+				}
+				for(String id: productIdFilter) {
+					if(prods.containsKey(id)) {
+						hasId = true;
+						break;
+					}
+				}
+				if(hasId) {
+					locations.get(name).setImage(loadImage("ui/marker_red.png"));
+					locations.get(name).setOn(true);
+				}
 			}
 		}
 
@@ -256,6 +273,12 @@ public class SimpleMapApp extends PApplet {
 	public void setArchFilter(String a) {
 		println("Filter by architecture " + a);
 		archFilter = a;
+		updateMarkers();
+	}
+
+	public void updateProductIdFilter(ArrayList<String> pif) {
+		println("Filter by product IDs = " + pif);
+		productIdFilter = pif;
 		updateMarkers();
 	}
 

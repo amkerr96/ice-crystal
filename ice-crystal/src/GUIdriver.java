@@ -1,4 +1,6 @@
 import java.awt.BorderLayout;
+
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -6,6 +8,8 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
@@ -21,9 +25,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.knowm.xchart.PieChart;
 import org.knowm.xchart.PieChartBuilder;
 import org.knowm.xchart.XChartPanel;
@@ -51,10 +58,18 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 	static boolean fileSelected;
 	private ArrayList<String> architectures;
 	private String archFilter;
+	private AutoCompleteDecorator decorator;
+    private JTextField searchBox;
+    private JPanel productIdPanel;
+    private ArrayList<String> productIds;
+    private ArrayList<idLabel> idLabels;
+    private ArrayList<String> productIdFilter;
 
 	public GUIdriver() {
 		locationFilters = new ArrayList<String>();
-
+		idLabels = new ArrayList<idLabel>();
+		productIdFilter = new ArrayList<String>();
+		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(1400, 800);
 		this.setLayout(new BorderLayout());
@@ -82,8 +97,13 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 		filtersPanel = new JPanel();
 		JPanel panel_3 = new JPanel();
 
-		panel_1.setLayout(new GridLayout(3, 1));
-
+		panel_1.setLayout(new GridLayout(2, 1));
+		JPanel panel_1_upper = new JPanel();
+		panel_1_upper.setLayout(new GridLayout(3,1));
+		panel_1.add(panel_1_upper);
+		
+		productIdPanel = new JPanel();
+		
 		JPanel filtersContainer = new JPanel();
 		filtersContainer.setLayout(new BorderLayout());
 		filtersPanel.setLayout(new FlowLayout());
@@ -93,6 +113,7 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 
 		// Filter all button
 		JButton filterAll = new JButton("All");
+		//System.out.println("COLOR" + filterAll.getBackground());
 		filterAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (filterAll.isSelected()) {
@@ -119,7 +140,7 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 		filtersContainer.add(stateScroll, BorderLayout.CENTER);
 		filtersContainer.add(filterAll, BorderLayout.SOUTH);
 
-		panel_3.setLayout(new GridLayout(3,1));
+		panel_3.setLayout(new GridLayout(6,1));
 
 		settingsPanel.add(panel_1);
 
@@ -142,7 +163,7 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 					sliderLabel = new JLabel("Filter by spend:");
 
 					int min = (int) Math.floor(map.getMinSpend());
-					int max = (int) Math.ceil(map.getMaxSpend()) / 2;
+					int max = 40000;//(int) Math.ceil(map.getMaxSpend());
 
 					JSlider spendSlider = new JSlider(0, max);
 
@@ -154,8 +175,61 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 					spendSlider.setValue(0);
 					spendSlider.addChangeListener(new SliderListener());
 
-					panel_1.add(sliderLabel, BorderLayout.CENTER);
-					panel_1.add(spendSlider, BorderLayout.SOUTH);
+					productIds = CSVParser.productIDs;
+					Collections.sort(productIds);
+					searchBox = new JTextField();//JComboBox(ids.toArray());
+					//AutoCompleteDecorator.decorate(searchBox);
+					searchBox.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+					        JTextField cb = (JTextField)e.getSource();
+					        String text = cb.getText();
+							System.out.println("Typed " + text);
+							updateProductIdPanel(text);
+					        //map.setArchFilter(archFilter);
+							//ArrayList<LocationMarker> sel = map.getDrawn();
+							//Collections.sort(sel);
+							//updateSelectedPanel(sel);
+						}
+					});
+					JPanel searchPanel = new JPanel();
+					searchPanel.setLayout(new GridLayout(2,1));
+					searchPanel.add(searchBox);
+					JButton clearIdFilter = new JButton("Clear ID Filter");
+					clearIdFilter.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							for(idLabel idl: idLabels) {
+								//System.out.println(label.getText());
+								if(idl.isSelected()) {
+									idl.setSelected(false);
+									idl.setBackground(null);
+									productIdFilter.remove(idl.getText());
+								}
+							}
+							map.updateProductIdFilter(productIdFilter);
+							
+							ArrayList<LocationMarker> sel = map.getDrawn();
+							Collections.sort(sel);
+							updateSelectedPanel(sel);
+						}
+					});
+					searchPanel.add(clearIdFilter);
+					panel_1_upper.add(new JLabel("Search by Product ID:"));
+					panel_1_upper.add(searchPanel);
+					
+					productIdPanel.setPreferredSize(new Dimension(100, 25 * productIds.size()));
+					productIdPanel.setLayout(new FlowLayout());//GridLayout(productIds.size(), 1));
+					for(String p: productIds) {
+						idLabel jl = new idLabel(p);
+						idLabels.add(jl);
+						updateProductIdPanel("");
+					}
+					JScrollPane scrollPaneIds = new JScrollPane(productIdPanel);
+					scrollPaneIds.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+					scrollPaneIds.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+					scrollPaneIds.setPreferredSize(productIdPanel.getSize());
+					panel_1.add(scrollPaneIds);
+					
 					panel_1.revalidate();
 					panel_1.repaint();
 					
@@ -178,6 +252,10 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 					JPanel archLabel = new JPanel();
 					archLabel.setLayout(new BorderLayout());
 					archLabel.add(new JLabel("Filter by Architecture"), BorderLayout.SOUTH);
+					
+					panel_3.add(sliderLabel);
+					panel_3.add(spendSlider);
+
 					panel_3.add(archLabel);
 					panel_3.add(archList);
 					
@@ -191,16 +269,17 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 						}
 					
 					});
+					panel_3.add(new JLabel("Filter by LDOS"));
 					panel_3.add(ldosButton);
 					
 					settingsPanel.add(filtersContainer);
 					settingsPanel.add(panel_3);
 					
-					//System.out.println("Arch: " + CSVParser.archLocations);
+					System.out.println("Prods: " + CSVParser.prodLocations);
 				}
 			}
 		});
-		panel_1.add(fileButton);
+		panel_1_upper.add(fileButton);
 
 		infoPanel.setLayout(new GridLayout(2, 1));
 		selectedPanel.setLayout(new FlowLayout());
@@ -384,5 +463,78 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 			}
 		}
 	}
+	
+	class idLabel extends JLabel {
+		protected boolean selected;
+		protected boolean filtered;
+		
+		public idLabel(String s) {
+			super(s);
+			this.setOpaque(true);
+			selected = false;
+			//filtered = false;
+			this.addMouseListener(new MouseListener() {
+
+				public void mousePressed(MouseEvent e) {
+					idLabel label = (idLabel)e.getSource();
+					System.out.println(label.getText());
+					if(label.isSelected()) {
+						label.setSelected(false);
+						label.setBackground(null);
+						productIdFilter.remove(label.getText());
+					} else {
+						label.setSelected(true);
+						label.setBackground(new Color(13421772));
+						productIdFilter.add(label.getText());
+					}
+					map.updateProductIdFilter(productIdFilter);
+					
+					ArrayList<LocationMarker> sel = map.getDrawn();
+					Collections.sort(sel);
+					updateSelectedPanel(sel);
+				}
+				
+				@Override
+				public void mouseClicked(MouseEvent e) {
+				}
+				@Override
+				public void mouseReleased(MouseEvent e) {
+				}
+				@Override
+				public void mouseEntered(MouseEvent e) {
+				}
+				@Override
+				public void mouseExited(MouseEvent e) {
+				}
+				
+		});
+		}
+		
+		protected boolean isSelected() {
+			return selected;
+		}
+		
+		protected void setSelected(boolean s) {
+			selected = s;
+		}
+	}
+	
+	public void updateProductIdPanel(String s) {
+		int i = 0;
+		productIdPanel.removeAll();
+
+		for(idLabel idl: idLabels) {
+			String p = idl.getText();
+			if(p.toLowerCase().startsWith(s.toLowerCase())) {
+				productIdPanel.add(idl);
+				i++;
+			}
+		}
+		
+		productIdPanel.setPreferredSize(new Dimension(100, 25 * i));
+		productIdPanel.revalidate();
+		productIdPanel.repaint();
+	}
+	
 	
 }

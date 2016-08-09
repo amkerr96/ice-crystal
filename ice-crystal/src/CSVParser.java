@@ -16,6 +16,7 @@ public class CSVParser extends JFrame {
 	static HashMap<String, HashMap< String, Double>> archLocations = new HashMap<String, HashMap< String, Double>>();
 	static HashMap<String, HashMap< String, Integer>> prodLocations = new HashMap<String, HashMap< String, Integer>>();
 	static ArrayList<String> architectures = new ArrayList<String>();
+	static ArrayList<String> productIDs = new ArrayList<String>();
 	
     public static void main(String [] args) {
     	frame = new JFrame("Unit Tester");
@@ -166,6 +167,9 @@ public class CSVParser extends JFrame {
 			            	
 			            	//Tier 3 <productID, numberInstalled>
 			            	HashMap<String, Integer> prods = new HashMap<String, Integer>();
+			            	if(!productIDs.contains(prodID)) {
+			            		productIDs.add(prodID);
+			            	}
 			            	if (prodLocations.get(city) == null) {
 			            		prods.put(prodID, 1);
 			            		prodLocations.put(city, prods);
@@ -185,8 +189,8 @@ public class CSVParser extends JFrame {
 	        	}	
 	        	
 	        	for (String loc : prodLocations.keySet()) {
-	        		System.out.println(loc);
-	        		System.out.println(prodLocations.get(loc).toString());
+	        		//System.out.println(loc);
+	        		//System.out.println(prodLocations.get(loc).toString());
 	        	}
 	        	
     		} catch (ArrayIndexOutOfBoundsException e) {	
