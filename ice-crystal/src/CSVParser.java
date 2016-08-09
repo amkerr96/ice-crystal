@@ -17,6 +17,7 @@ public class CSVParser extends JFrame {
 	static HashMap<String, HashMap< String, Integer>> prodLocations = new HashMap<String, HashMap< String, Integer>>();
 	static ArrayList<String> architectures = new ArrayList<String>();
 	static ArrayList<String> productIDs = new ArrayList<String>();
+	static HashMap<String, Double> ldosLocs = new HashMap<String, Double>();
 	
     public static void main(String [] args) {
     	frame = new JFrame("Unit Tester");
@@ -119,7 +120,7 @@ public class CSVParser extends JFrame {
 		            	year = Integer.parseInt(date.split("/")[0]);
 		            	ldos = fields[17];
 		            	if (!ldos.equals("<NULL>")) {
-		            		ldosYear = Integer.parseInt(ldos.split("/")[0]);
+		            		ldosYear = Integer.parseInt(ldos.split("/")[2]);
 		            	} else {
 		            		ldosYear = 99;
 		            	}
@@ -182,16 +183,26 @@ public class CSVParser extends JFrame {
 			            		}		            	
 			            		prodLocations.put(city, inner);
 			            	}
+			            	
+			            	//LDoS info - static, set to start at Aug 2016
+			            	if (ldosYear >= 16 && ldosYear < 19) {
+				            	if (ldosLocs.get(city) == null) {
+				            		ldosLocs.put(city, spend);
+				            	} else {
+				            		ldosLocs.put(city, ((Double)ldosLocs.get(city)).doubleValue() + spend);
+				            	}
+			            	}
 		            	}
 	        		
 	        		}
 	        		counter++;
 	        	}	
 	        	
-	        	for (String loc : prodLocations.keySet()) {
-	        		//System.out.println(loc);
-	        		//System.out.println(prodLocations.get(loc).toString());
-	        	}
+	        	//Test LDoS Refresh Ratios
+//	            for (String locs : ldosLocs.keySet()) {
+//	            	double ratio = (ldosLocs.get(locs) / locations.get(locs)) * 100;
+//	        		System.out.println("City: "  + locs + ", Ratio: " + ratio + "%");
+//	        	}
 	        	
     		} catch (ArrayIndexOutOfBoundsException e) {	
 
