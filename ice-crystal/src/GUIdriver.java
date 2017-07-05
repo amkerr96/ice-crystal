@@ -28,7 +28,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 import org.knowm.xchart.PieChart;
 import org.knowm.xchart.PieChartBuilder;
 import org.knowm.xchart.XChartPanel;
@@ -70,7 +69,6 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 	private JTextField searchBox;
 	/** Panel for list of Product ID filters */
 	private JPanel productIdPanel;
-
 	/** List of location filters */
 	private ArrayList<String> locationFilters;
 	/** Has a file been selected? */
@@ -546,7 +544,14 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Add stuff here!
+				JButton b = (JButton)e.getSource();
+				if (b.isSelected()) {
+					b.setSelected(false);
+					map.removeByLdosLocation();
+				} else {
+					b.setSelected(true);
+					map.addByLdosLocation();
+				}
 			}
 
 		});

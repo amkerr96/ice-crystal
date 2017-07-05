@@ -199,10 +199,10 @@ public class CSVParser extends JFrame {
 	        	}	
 	        	
 	        	//Test LDoS Refresh Ratios
-//	            for (String locs : ldosLocs.keySet()) {
-//	            	double ratio = (ldosLocs.get(locs) / locations.get(locs)) * 100;
-//	        		System.out.println("City: "  + locs + ", Ratio: " + ratio + "%");
-//	        	}
+	            for (String locs : ldosLocs.keySet()) {
+	            	double ratio = (ldosLocs.get(locs) / locations.get(locs)) * 100;
+	        		System.out.println("City: "  + locs + ", Ratio: " + ratio + "%");
+	        	}
 	        	
     		} catch (ArrayIndexOutOfBoundsException e) {	
 

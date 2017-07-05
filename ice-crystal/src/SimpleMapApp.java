@@ -24,7 +24,6 @@ public class SimpleMapApp extends PApplet {
 
 	/** Property change supporter */
 	private PropertyChangeSupport changes = new PropertyChangeSupport(this);
-
 	/** Which map is currently being used */
 	private UnfoldingMap currentMap;
 	/** Google style map */
@@ -75,7 +74,7 @@ public class SimpleMapApp extends PApplet {
 		mapStreet = new UnfoldingMap(this, new OpenStreetMap.OpenStreetMapProvider());
 		MapUtils.createDefaultEventDispatcher(this, mapGoogle, mapMs, mapStreet);
 
-		currentMap = mapGoogle;
+		currentMap = mapStreet;
 		
 		WebService.setUserName("icecrystal");
 	}
@@ -309,6 +308,30 @@ public class SimpleMapApp extends PApplet {
 				if (!selected.contains(locations.get(s))) {
 					selected.add(locations.get(s));
 				}
+			}
+		}
+		updateMarkers();
+	}
+	
+	/**
+	 * Add all markers within a given region/location/state
+	 * @param state the region to add all markers from
+	 */
+	public void addByLdosLocation() {
+		println("Filtering By LDoS");
+		for (String s : CSVParser.ldosLocs.keySet()) {
+			if (!selected.contains(locations.get(s))) {
+				selected.add(locations.get(s));
+			}
+		}
+		updateMarkers();
+	}
+	
+	public void removeByLdosLocation() {
+		println("Removing LDoS Markers");
+		for (String s : CSVParser.ldosLocs.keySet()) {
+			if (selected.contains(locations.get(s))) {
+				selected.remove(locations.get(s));
 			}
 		}
 		updateMarkers();
