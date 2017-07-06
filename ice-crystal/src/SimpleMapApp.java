@@ -91,14 +91,14 @@ public class SimpleMapApp extends PApplet {
 
 		// For each location, lookup and add
 		for (String loc : /* locs */CSVParser.locations.keySet()) {
-			withState = loc + ", " + CSVParser.states.get(loc);
+			withState = loc;// + ", " + CSVParser.states.get(loc);
 			searchCriteria.setQ(withState);
 			ToponymSearchResult searchResult;
 			try {
 				// Search for location
-				//System.out.println("Searching for " + searchCriteria);
+//				System.out.println("Searching for " + searchCriteria);
 				searchResult = WebService.search(searchCriteria);
-				//System.out.println("Done searching for " + searchCriteria);
+//				System.out.println("Done searching for " + searchCriteria);
 				// Try first result
 				Toponym toponym = searchResult.getToponyms().get(0);
 				// If first result isn't accurate, keep looking
@@ -157,6 +157,8 @@ public class SimpleMapApp extends PApplet {
 		for (String loc : locations.keySet()) {
 			currentMap.addMarker(locations.get(loc));
 		}
+		
+		System.out.println(locations);
 	}
 
 	/**

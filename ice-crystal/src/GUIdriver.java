@@ -119,39 +119,39 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 		settingsPanel.add(settingsPanelTop);
 
 		// Middle of settings panel
-		regionalSelectorsPanel = new JPanel();
-		JPanel filtersContainer = new JPanel();
-		filtersContainer.setLayout(new BorderLayout());
-		regionalSelectorsPanel.setLayout(new FlowLayout());
-		regionalSelectorScroll = new JScrollPane(regionalSelectorsPanel);
-		regionalSelectorScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		regionalSelectorScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		// Filter all button
-		JButton filterAll = new JButton("All");
-		filterAll.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (filterAll.isSelected()) {
-					filterAll.setSelected(false);
-					map.removeAll();
-					for (Component c : regionalSelectorsPanel.getComponents()) {
-						if (c instanceof JButton) {
-							((JButton) c).setSelected(false);
-						}
-					}
-				} else {
-					filterAll.setSelected(true);
-					map.addAll();
-					for (Component c : regionalSelectorsPanel.getComponents()) {
-						if (c instanceof JButton) {
-							((JButton) c).setSelected(true);
-						}
-					}
-				}
-			}
-		});
-		filtersContainer.add(new JLabel("Select by location: "), BorderLayout.NORTH);
-		filtersContainer.add(regionalSelectorScroll, BorderLayout.CENTER);
-		filtersContainer.add(filterAll, BorderLayout.SOUTH);
+//		regionalSelectorsPanel = new JPanel();
+//		JPanel filtersContainer = new JPanel();
+//		filtersContainer.setLayout(new BorderLayout());
+//		regionalSelectorsPanel.setLayout(new FlowLayout());
+//		regionalSelectorScroll = new JScrollPane(regionalSelectorsPanel);
+//		regionalSelectorScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+//		regionalSelectorScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+//		// Filter all button
+//		JButton filterAll = new JButton("All");
+//		filterAll.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				if (filterAll.isSelected()) {
+//					filterAll.setSelected(false);
+//					map.removeAll();
+//					for (Component c : regionalSelectorsPanel.getComponents()) {
+//						if (c instanceof JButton) {
+//							((JButton) c).setSelected(false);
+//						}
+//					}
+//				} else {
+//					filterAll.setSelected(true);
+//					map.addAll();
+//					for (Component c : regionalSelectorsPanel.getComponents()) {
+//						if (c instanceof JButton) {
+//							((JButton) c).setSelected(true);
+//						}
+//					}
+//				}
+//			}
+//		});
+//		filtersContainer.add(new JLabel("Select by location: "), BorderLayout.NORTH);
+//		filtersContainer.add(regionalSelectorScroll, BorderLayout.CENTER);
+//		filtersContainer.add(filterAll, BorderLayout.SOUTH);
 
 		// Bottom of settings panel
 		settingsPanelBottom = new JPanel();
@@ -191,8 +191,8 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 					map.drawMap();
 
 					// Add filters based on map
-					ArrayList<String> states = CSVParser.getStates();
-					updateRegionalSelectors(states);
+//					ArrayList<String> states = CSVParser.getStates();
+//					updateRegionalSelectors(states);
 
 					// Add slider based on spend
 					addSlider();
@@ -206,7 +206,7 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 					// Add LDOS button
 					addLDOSButton();
 
-					settingsPanel.add(filtersContainer);
+//					settingsPanel.add(filtersContainer);
 					settingsPanel.add(settingsPanelBottom);
 				}
 			}
@@ -242,11 +242,11 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 			button.addActionListener(new ActionListener() {
 				// Display pie chart
 				public void actionPerformed(ActionEvent e) {
-					HashMap<String, Double> archs = CSVParser.archLocations.get(im.getName().toUpperCase());
+					HashMap<String, Integer> prods = CSVParser.prodLocations.get(im.getName().toUpperCase());
 					System.out.println("\n------" + im.getName() + "------");
-					for (String arch : archs.keySet()) {
-						System.out.println(arch + ": " + archs.get(arch));
-					}
+//					for (String prod : prods.keySet()) {
+//						System.out.println(prod + ": " + prods.get(prod));
+//					}
 					drawPieChart(im);
 				}
 			});
@@ -254,9 +254,8 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 				// Button formatting
 				button.setLayout(new BorderLayout());
 				JLabel label1 = new JLabel(im.getName());
-				DecimalFormat formatter = new DecimalFormat("#,###.00");
-				JLabel label2 = new JLabel("$" + String.valueOf(
-						formatter.format(CSVParser.round(CSVParser.locations.get(im.getName().toUpperCase()), 2))));
+//				DecimalFormat formatter = new DecimalFormat("#,###.00");
+				JLabel label2 = new JLabel("x " + CSVParser.locations.get(im.getName().toUpperCase()).toString());
 				button.add(BorderLayout.NORTH, label1);
 				button.add(BorderLayout.SOUTH, label2);
 				selectedPanel.add(button);
@@ -309,37 +308,37 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 	 * @param states
 	 *            The list of states present in the locations
 	 */
-	public void updateRegionalSelectors(ArrayList<String> states) {
-		int len = states.size();
-
-		regionalSelectorScroll.setPreferredSize(new Dimension(200, (len / 2) * 25));
-		regionalSelectorsPanel.setPreferredSize(new Dimension(200, (len / 2) * 25));
-
-		java.util.Collections.sort(states);
-		for (String s : states) {
-			JButton b = new JButton(s);
-			b.setPreferredSize(new Dimension(50, 25));
-			// Add or remove all based on states
-			b.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					if (b.isSelected()) {
-						locationFilters.remove(s);
-						b.setSelected(false);
-						map.removeByLocation(s);
-					} else {
-						locationFilters.add(s);
-						b.setSelected(true);
-						map.addByLocation(s);
-					}
-				}
-			});
-			b.setSelected(false);
-			regionalSelectorsPanel.add(b);
-		}
-
-		regionalSelectorScroll.revalidate();
-		regionalSelectorScroll.repaint();
-	}
+//	public void updateRegionalSelectors(ArrayList<String> states) {
+//		int len = states.size();
+//
+//		regionalSelectorScroll.setPreferredSize(new Dimension(200, (len / 2) * 25));
+//		regionalSelectorsPanel.setPreferredSize(new Dimension(200, (len / 2) * 25));
+//
+//		java.util.Collections.sort(states);
+//		for (String s : states) {
+//			JButton b = new JButton(s);
+//			b.setPreferredSize(new Dimension(50, 25));
+//			// Add or remove all based on states
+//			b.addActionListener(new ActionListener() {
+//				public void actionPerformed(ActionEvent e) {
+//					if (b.isSelected()) {
+//						locationFilters.remove(s);
+//						b.setSelected(false);
+//						map.removeByLocation(s);
+//					} else {
+//						locationFilters.add(s);
+//						b.setSelected(true);
+//						map.addByLocation(s);
+//					}
+//				}
+//			});
+//			b.setSelected(false);
+//			regionalSelectorsPanel.add(b);
+//		}
+//
+//		regionalSelectorScroll.revalidate();
+//		regionalSelectorScroll.repaint();
+//	}
 
 	/**
 	 * Draw pie chart for a location.
@@ -367,16 +366,16 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 		chart.getStyler().setLegendPadding(1);
 		chart.getStyler().setLegendPosition(LegendPosition.InsideSE);
 
-		HashMap<String, Double> archs = CSVParser.archLocations.get(loc.getName().toUpperCase());
+		HashMap<String, Integer> prods = CSVParser.prodLocations.get(loc.getName().toUpperCase());
 
 		System.out.println("\n------" + loc.getName() + "------");
-		if (archs.keySet().size() > 4) {
+		if (prods.keySet().size() > 4) {
 			chart.getStyler().setAnnotationDistance(1.15);
 		}
 
-		for (String arch : archs.keySet()) {
-			System.out.println(arch + ": " + archs.get(arch));
-			chart.addSeries(arch, archs.get(arch));
+		for (String prod : prods.keySet()) {
+			System.out.println(prod + ": " + prods.get(prod));
+			chart.addSeries(prod, prods.get(prod));
 		}
 
 		JPanel frame = new JPanel();
@@ -539,7 +538,7 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 	 * Add button to filter by LDOS (not yet implemented)
 	 */
 	public void addLDOSButton() {
-		JButton ldosButton = new JButton("LDOS Button");
+		JButton ldosButton = new JButton("Binary Button");
 		ldosButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -547,15 +546,15 @@ public class GUIdriver extends JFrame implements PropertyChangeListener {
 				JButton b = (JButton)e.getSource();
 				if (b.isSelected()) {
 					b.setSelected(false);
-					map.removeByLdosLocation();
+//					map.removeByLdosLocation();
 				} else {
 					b.setSelected(true);
-					map.addByLdosLocation();
+//					map.addByLdosLocation();
 				}
 			}
 
 		});
-		settingsPanelBottom.add(new JLabel("Filter by LDOS"));
+		settingsPanelBottom.add(new JLabel("Future Binary Button"));
 		settingsPanelBottom.add(ldosButton);
 	}
 

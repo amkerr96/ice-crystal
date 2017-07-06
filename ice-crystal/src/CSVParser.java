@@ -11,7 +11,7 @@ import javax.swing.border.EmptyBorder;
 public class CSVParser extends JFrame {
 	static int buttonHit = 0;
 	static JFrame frame;
-	static HashMap<String, Double> locations = new HashMap<String, Double>();
+	static HashMap<String, Integer> locations = new HashMap<String, Integer>();
 	static HashMap<String, String> states = new HashMap<String, String>();
 	static HashMap<String, HashMap< String, Double>> archLocations = new HashMap<String, HashMap< String, Double>>();
 	static HashMap<String, HashMap< String, Integer>> prodLocations = new HashMap<String, HashMap< String, Integer>>();
@@ -111,44 +111,44 @@ public class CSVParser extends JFrame {
         	try {
 	        	while ((line = br.readLine()) != null) {
 	        		
-	        		if (counter >= 4) {
+	        		if (counter >= 2) {
 		            	String [] fields = line.split("\t", -1);
 		            	
-		            	city = fields[5];
-		            	state = fields[6];
-		            	date = fields[16];
-		            	year = Integer.parseInt(date.split("/")[0]);
-		            	ldos = fields[17];
-		            	if (!ldos.equals("<NULL>")) {
-		            		ldosYear = Integer.parseInt(ldos.split("/")[2]);
-		            	} else {
-		            		ldosYear = 99;
-		            	}
-		            	prodID = fields[22];
-		            	archGrp = fields[23];
+		            	city = fields[18]; //5 -> 18
+		            	state = fields[21]; //6 -> 21 (countries)
+		            	date = fields[55]; //16 -> 55
+		            	year = Integer.parseInt(date.split("/")[2]);
+		            	//ldos = fields[17]; //17 will turn to binary switch later
+//		            	if (!ldos.equals("<NULL>")) {
+//		            		ldosYear = Integer.parseInt(ldos.split("/")[2]);
+//		            	} else {
+//		            		ldosYear = 99;
+//		            	}
+		            	prodID = fields[33]; //22 -> 33
+		            	archGrp = fields[14]; //23 -> 14 (site name)
 
 			        	
 			        	if(!architectures.contains(archGrp)) {
 			        		architectures.add(archGrp);
 			        	}
 			        	
-		            	if (!fields[28].equals("")) {
-		            		spend = round(Double.parseDouble(fields[28]), 2);
-		            	} else {
-		            		spend = 0.00;
-		            	}		   
+//		            	if (!fields[28].equals("")) {
+//		            		spend = round(Double.parseDouble(fields[28]), 2);
+//		            	} else {
+//		            		spend = 0.00;
+//		            	}		   
 	            	
 		            	//System.out.printf("%s, %s, %s, %s, %s, %f\n", city, state, date, prodID, archGrp, spend);
-		            	if (year >= 10 && year < 90) {
+//		            	if (year >= 10 && year < 90) {
 //		            		System.out.println("Year: " + date.split("/")[1]);
 //		            		System.out.println("LDoS: " + ldosYear);
 		          	
 			            	//Tier 1 <location, spend>
 			            	if (locations.get(city) == null) {
-			            		locations.put(city, spend);
+			            		locations.put(city, 1);
 			            		states.put(city, state);
 			            	} else {
-			            		locations.put(city, ((Double)locations.get(city)).doubleValue() + spend);
+			            		locations.put(city, locations.get(city).intValue() + 1);
 			            	}
 			            	
 			            	//Tier 2 <architecture, spend>
@@ -184,25 +184,25 @@ public class CSVParser extends JFrame {
 			            		prodLocations.put(city, inner);
 			            	}
 			            	
-			            	//LDoS info - static, set to start at Aug 2016
-			            	if (ldosYear >= 16 && ldosYear < 19) {
-				            	if (ldosLocs.get(city) == null) {
-				            		ldosLocs.put(city, spend);
-				            	} else {
-				            		ldosLocs.put(city, ((Double)ldosLocs.get(city)).doubleValue() + spend);
-				            	}
-			            	}
-		            	}
+//			            	//LDoS info - static, set to start at Aug 2016
+//			            	if (ldosYear >= 16 && ldosYear < 19) {
+//				            	if (ldosLocs.get(city) == null) {
+//				            		ldosLocs.put(city, spend);
+//				            	} else {
+//				            		ldosLocs.put(city, ((Double)ldosLocs.get(city)).doubleValue() + spend);
+//				            	}
+//			            	}
+//		            	}
 	        		
 	        		}
 	        		counter++;
 	        	}	
 	        	
 	        	//Test LDoS Refresh Ratios
-	            for (String locs : ldosLocs.keySet()) {
-	            	double ratio = (ldosLocs.get(locs) / locations.get(locs)) * 100;
-	        		System.out.println("City: "  + locs + ", Ratio: " + ratio + "%");
-	        	}
+//	            for (String locs : ldosLocs.keySet()) {
+//	            	double ratio = (ldosLocs.get(locs) / locations.get(locs)) * 100;
+//	        		System.out.println("City: "  + locs + ", Ratio: " + ratio + "%");
+//	        	}
 	        	
     		} catch (ArrayIndexOutOfBoundsException e) {	
 
